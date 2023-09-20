@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "335574407035",
+    "project_id": "tummybox-f2238",
+    "storage_bucket": "tummybox-f2238.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:335574407035:android:f36f3029ee250153140fde",
+        "android_client_info": {
+          "package_name": "com.example.tb_deliveryapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2KcnPJ8d-A5mui2IQfYscKzS92BuyFx4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:335574407035:android:8e9f5d984dff9b45140fde",
+        "android_client_info": {
+          "package_name": "com.mycompany.tummybox"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2KcnPJ8d-A5mui2IQfYscKzS92BuyFx4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
