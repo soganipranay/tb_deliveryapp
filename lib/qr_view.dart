@@ -263,7 +263,7 @@ class _QRViewExampleState extends State<QRViewExample> {
     super.dispose();
   }
 
-  Future<List<Map<String, dynamic>>> fetchOrderReferencesByPid(String pid) async {
+  Future<List<Map<String, dynamic>>> fetchOrderReferencesByPid(pid) async {
   try {
     CollectionReference ordersCollection = FirebaseFirestore.instance.collection('Orders');
     DateTime currentDate = DateTime.now();
@@ -277,11 +277,18 @@ class _QRViewExampleState extends State<QRViewExample> {
     print('Current Date: $currentDate');
     print('Next Date: $nextDate');
     QuerySnapshot querySnapshot = await ordersCollection
-        // .where('userID', isEqualTo: pid)
+        .where('pid', isEqualTo: pid)
         // .where('deliveryDate' ,isGreaterThanOrEqualTo: currentDate)
         // .where('deliveryDate' ,isLessThan: nextDate)
         .get();
+    querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
+        // Get the reference of each document
+        Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
 
+        // Now, you can use this reference as needed
+        // For example, you can print the path of the document:
+        print('Document Path: ${data}');
+      });
     // List<String> orderReferences = [];
     // List<DateTime> orderDeliveryDates = [];
     List<Map<String, dynamic>> ordersList = [];
