@@ -1,8 +1,10 @@
 import 'auth_manager.dart';
+import 'packed_qr_view.dart'; 
 import 'package:flutter/material.dart';
 import 'package:tb_deliveryapp/bgWidget.dart';
+import 'package:tb_deliveryapp/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'packed_qr_view.dart'; // Import the PackedQRView widget
+
 
 class LoginPage extends StatefulWidget {
   @override
@@ -31,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
         await saveUserLoggedIn(true); // Store login state
         Navigator.of(context).pushReplacement(MaterialPageRoute
                     (
-                      builder: (context) => const PackedQRView(isLoggedIn: true),
+                      builder: (context) => const HomeView(isLoggedIn: true),
                     ));
       } else {
         // Failed to log in

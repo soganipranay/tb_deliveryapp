@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
-
 class DeliveredQRView extends StatefulWidget {
   const DeliveredQRView({Key? key}) : super(key: key);
 
@@ -35,7 +33,7 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tummy Box Partner App'),
+        title: const Text('Delivered'),
         leading: Padding(
           padding: const EdgeInsets.all(6.0),
           child: Image.asset(
@@ -44,14 +42,6 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
             height: 40, // Adjust the height as needed
           ),
         ),
-        // actions: [
-        //   if (widget.isLoggedIn) // Use the isLoggedIn value here
-        //     IconButton(
-        //       onPressed: () =>
-        //           logoutUser(context), // Call the logoutUser function
-        //       icon: const Icon(Icons.logout),
-        //     ),
-        // ],
       ),
       body: Column(
         children: <Widget>[
@@ -113,34 +103,47 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                           .isNotEmpty // Use the stored orderDetails variable
                   ? () async {
                       await controller?.pauseCamera();
+                      result = null;
                       for (var orderItem in scannedOrderDetails) {
-                        await updateOrderStatus(
-                            orderItem['orderRef'], 'Order Delivered');
+                        if (orderItem['orderStatus'] == 'Order Packed') {
+                          await updateOrderStatus(
+                              orderItem['orderRef'], 'Order Delivered');
+                          print("Order Delivered: ${orderItem['orderRef']}");
+                        }
+                        else if (orderItem['orderStatus'] == 'Order Delivered') {
+                          // Dissable the ElevatedButton
+                          print('Order already Delivered');
+                        } else {
+                          // ignore: use_build_context_synchronously
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                    title:
+                                        const Text('Order already Delivered'),
+                                    content: Text(orderItem['orderRef']),
+                                    actions: <Widget>[
+                                      ElevatedButton(
+                                        onPressed: () => Navigator.of(context)
+                                            .pop(), // Close the dialog,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors
+                                              .orange, // Use the accent color
+                                        ),
+                                        child: const Text('Ok'),
+                                      )
+                                    ]);
+                              });
+                        }
                       }
-                      // ignore: use_build_context_synchronously
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                                title: const Text('Unable to Login'),
-                                content: const Text(
-                                    'Wrong Email ID or Passoword was entered. Please try again.'),
-                                actions: <Widget>[
-                                  ElevatedButton(
-                                    onPressed: () => Navigator.of(context)
-                                        .pop(), // Close the dialog,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          Colors.orange, // Use the accent color
-                                    ),
-                                    child: const Text('Ok'),
-                                  )
-                                ]);
-                          });
-                      // await controller?.resumeCamera();
+                      await controller?.resumeCamera();
                     }
-                  : () => print(
-                      'Button is disabled and barcodeResult = $result and {$scannedOrderDetails}'),
+                  : () => {
+                        print(
+                            'Button is disabled and barcodeResult = result = $result and {$scannedOrderDetails}'),
+                        print(scannedOrderDetails.isNotEmpty),
+                        result = null,
+                      },
               style: ElevatedButton.styleFrom(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -185,36 +188,8 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
         result = scanData;
       });
       print(result!.code.toString());
-      // await controller.pauseCamera();
-      // if (result != null) {
-      // List<Map<String, dynamic>> orders =
-      //     await fetchAndShowOrders(result!.code.toString());
-      // // if (orders.isNotEmpty) {
-      // //   _showOrdersPage(orders,context); // Pass context here
-      // // }
-      // if (orders.isNotEmpty) {
-      //   for (Map<String, dynamic> order in orders) {
-      //     print("Order Name: ${order['orderName']}");
-      //     print("Quantity: ${order['quantity']}");
-      //     print("Order Type: ${order['orderType']}");
-      //     print(""); // Print an empty line between orders
-      //   }
-      // }
-      // else {
-      //   // Handle no matching orders
-      // }
-      //
-      // List<Map<String, dynamic>> orderDetails = await fetchOrderReferencesByPid(result!.code.toString());
-      // print(orderDetails);
-      // if (orderDetails.isNotEmpty) {
-      //  // ignore: use_build_context_synchronously
-      //  _showOrdersPage(orderDetails,context);
-      // }
-      // }
     });
   }
-
-
 
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
     log('${DateTime.now().toIso8601String()}_onPermissionSet $p');
@@ -285,8 +260,8 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
       print('Next Date: $nextDate');
       QuerySnapshot querySnapshot = await ordersCollection
           .where('pid', isEqualTo: pid)
-          // .where('deliveryDate' ,isGreaterThanOrEqualTo: currentDate)
-          // .where('deliveryDate' ,isLessThan: nextDate)
+          .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
+          .where('deliveryDate', isLessThan: nextDate)
           .get();
       querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
         // Get the reference of each document
@@ -296,29 +271,22 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
         // For example, you can print the path of the document:
         print('Document Path: ${documentReference.path}');
       });
-      // List<String> orderReferences = [];
-      // List<DateTime> orderDeliveryDates = [];
+
       List<Map<String, dynamic>> ordersList = [];
       querySnapshot.docs.forEach((documentSnapshot) {
-        // orderReferences.add(documentSnapshot.reference.id);
-        // orderDeliveryDates.add(documentSnapshot.get('deliveryDate').toDate());
-
         Map<String, dynamic> data =
             documentSnapshot.data() as Map<String, dynamic>;
         String orderName = data['orderName'];
         int quantity = data['numberOfItems'];
         String orderType = data['orderType'];
-        // DateTime delDate = data['deliveryDate'].toDate();
-
-        // delDate = DateTime(delDate.year, delDate.month, delDate.day);
-
-        // print(currentDate == delDate);
+        String orderStatus = data['Status'];
 
         Map<String, dynamic> orderMap = {
           'orderName': orderName,
           'quantity': quantity,
           'orderType': orderType,
-          'orderRef': documentSnapshot.reference.id
+          'orderRef': documentSnapshot.reference.id,
+          'orderStatus': orderStatus
         };
         ordersList.add(orderMap);
       });

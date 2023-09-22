@@ -1,8 +1,10 @@
-import 'main.dart';
 import 'auth_manager.dart';
 import 'delivered_qr_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:tb_deliveryapp/packed_qr_view.dart';
+
+
 
 class HomeView extends StatefulWidget {
   final bool isLoggedIn;
@@ -11,17 +13,10 @@ class HomeView extends StatefulWidget {
   @override
   State<HomeView> createState() => _HomeViewState();
 }
-
 class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
-    return Container();
-  }
-}
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  return Scaffold(
       appBar: AppBar(
         title: const Text('Tummy Box Partner App'),
         leading: Padding(
@@ -32,14 +27,14 @@ class _HomeViewState extends State<HomeView> {
             height: 40, // Adjust the height as needed
           ),
         ),
-        // actions: [
-        //   if (widget.isLoggedIn) // Use the isLoggedIn value here
-        //     IconButton(
-        //       onPressed: () =>
-        //           logoutUser(context), // Call the logoutUser function
-        //       icon: const Icon(Icons.logout),
-        //     ),
-        // ],
+        actions: [
+          if (widget.isLoggedIn) // Use the isLoggedIn value here
+            IconButton(
+              onPressed: () =>
+                  logoutUser(context), // Call the logoutUser function
+              icon: const Icon(Icons.logout),
+            ),
+        ],
       ),
       // add buttons to redirect to packed and delivered pages
 
@@ -50,7 +45,7 @@ class _HomeViewState extends State<HomeView> {
             const Text('Please select an option below'),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const PackedQRView(isLoggedIn: true)));
+                Navigator.push(context, MaterialPageRoute(builder: (context) =>  PackedQRView()));
               },
               child: const Text('Packed'),
             ),
@@ -66,4 +61,4 @@ class _HomeViewState extends State<HomeView> {
       
     );
   }
-
+}

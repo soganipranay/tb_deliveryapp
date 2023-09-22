@@ -1,9 +1,9 @@
-import 'login_page.dart';
 import 'auth_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:tb_deliveryapp/home_page.dart';
+import 'package:tb_deliveryapp/login_page.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:tb_deliveryapp/packed_qr_view.dart';
+
 
 
 void main() async {
@@ -25,7 +25,7 @@ class MyHome extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Tummy Box Partner App',
-      home:const HomeView(isLoggedIn: true),
+      home: isLoggedIn ? const HomeView(isLoggedIn: true) : LoginPage(),
     );
   }
 }
