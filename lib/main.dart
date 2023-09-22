@@ -1,8 +1,10 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'package:tb_deliveryapp/qr_view.dart';
 import 'login_page.dart';
 import 'auth_manager.dart';
+import 'package:flutter/material.dart';
+import 'package:tb_deliveryapp/home_page.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:tb_deliveryapp/packed_qr_view.dart';
+
 
 void main() async {
   // Initialize Firebase
@@ -23,7 +25,7 @@ class MyHome extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Tummy Box Partner App',
-      home: isLoggedIn ? const QRViewExample(isLoggedIn: true) : LoginPage(),
+      home:const HomeView(isLoggedIn: true),
     );
   }
 }

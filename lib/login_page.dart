@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:tb_deliveryapp/bgWidget.dart';
 import 'auth_manager.dart';
-import 'qr_view.dart'; // Import the QRViewExample widget
+import 'package:flutter/material.dart';
+import 'package:tb_deliveryapp/bgWidget.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'packed_qr_view.dart'; // Import the PackedQRView widget
 
 class LoginPage extends StatefulWidget {
   @override
@@ -31,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
         await saveUserLoggedIn(true); // Store login state
         Navigator.of(context).pushReplacement(MaterialPageRoute
                     (
-                      builder: (context) => const QRViewExample(isLoggedIn: true),
+                      builder: (context) => const PackedQRView(isLoggedIn: true),
                     ));
       } else {
         // Failed to log in
@@ -139,7 +139,7 @@ class _LoginPageState extends State<LoginPage> {
   //   if (email == "abc@tummybox.in" && password == "password"){
   //     Navigator.of(context).push(MaterialPageRoute
   //                   (
-  //                     builder: (context) => const QRViewExample(),
+  //                     builder: (context) => const PackedQRView(),
   //                   ));
   //   }
   //   else{
