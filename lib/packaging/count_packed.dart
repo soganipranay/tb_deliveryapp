@@ -11,12 +11,17 @@ class CountPackedOrders extends StatefulWidget {
 
 class _CountPackedOrdersState extends State<CountPackedOrders> {
   late String profileType;
-  late int totalPackedOrders;
+  late int totalPackedOrders = 0;
   late int totalOrders = 0;
   @override
   void initState() {
     super.initState();
     countPackedOrders(); // Call the function to fetch the data
+    fetchTotalOrders().then((value) {
+      setState(() {
+        totalOrders = value;
+      });
+    });
   }
 
   @override
@@ -37,7 +42,7 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
             child: Column(
           children: [
             Text('Welcome to Tummy Box Partner App'),
-            Text('You have total of $fetchTotalOrders orders to pack today'),
+            Text('You have total of $totalOrders orders to pack today'),
             // if(y>0):
             ElevatedButton(
               onPressed: () {
@@ -47,7 +52,7 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
               child: Text('You have packed $totalPackedOrders orders today'),
             ),
             Text(
-                "You have packed $totalPackedOrders orders today and y orders is remaining"),
+                "You have packed $totalPackedOrders orders today and ${totalOrders - totalPackedOrders} orders is remaining"),
           ],
         )));
   }
@@ -76,7 +81,7 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
     // Query the 'Breakfast' document
     DocumentSnapshot breakfastSnapshot =
         await timeCollection.doc('breakfast').get();
-    // // Extract startTime and endTime from 'Breakfast' document
+    // Extract startTime and endTime from 'Breakfast' document
     Map<String, dynamic> breakfastData =
         breakfastSnapshot.data() as Map<String, dynamic>;
 
@@ -92,24 +97,33 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
     Map<String, dynamic> dinnerData =
         dinnerSnapshot.data() as Map<String, dynamic>;
 
+    // Function to convert Firestore Timestamp to DateTime and format as HH:mm:ss
+    String timestampToFormattedTime(Timestamp timestamp) {
+      DateTime dateTime = timestamp.toDate();
+      String formattedTime =
+          "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}:${dateTime.second.toString().padLeft(2, '0')}";
+      return formattedTime;
+    }
+
     // Create a map to hold the start and end times for each slot
     Map<String, dynamic> timeSlots = {
       'Breakfast': {
-        'startTime': breakfastData['StartTime'],
-        'endTime': breakfastData['EndTime'],
+        'startTime': timestampToFormattedTime(breakfastData['StartTime']),
+        'endTime': timestampToFormattedTime(breakfastData['EndTime']),
       },
       'Lunch': {
-        'startTime': lunchData['StartTime'],
-        'endTime': lunchData['EndTime'],
+        'startTime': timestampToFormattedTime(lunchData['StartTime']),
+        'endTime': timestampToFormattedTime(lunchData['EndTime']),
       },
       'Dinner': {
-        'startTime': dinnerData['StartTime'],
-        'endTime': dinnerData['EndTime'],
+        'startTime': timestampToFormattedTime(dinnerData['StartTime']),
+        'endTime': timestampToFormattedTime(dinnerData['EndTime']),
       },
     };
     print('Time Slots: $timeSlots');
     return timeSlots;
   }
+
 
   Future<int> fetchTotalOrders() async {
     
@@ -135,6 +149,7 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
               .isAfter(DateTime.parse(timeSlots['breakfast']['startTime'])) &&
           DateTime.parse(currentTime)
               .isBefore(DateTime.parse(timeSlots['breakfast']['endTime']))) {
+                print('Current Time: ${DateTime.parse(currentTime)}');
         if (profileType == "Child") {
           QuerySnapshot querySnapshot = await ordersCollection
               .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
