@@ -52,13 +52,15 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
               child: Text('You have packed $totalPackedOrders orders today'),
             ),
             Text(
-                "You have packed $totalPackedOrders orders today and ${totalOrders - totalPackedOrders} orders is remaining"),
+              // add a condititon if totalOrders - totalPackedOrders < 0 then show 0
+              "You have packed $totalPackedOrders orders today and ${(totalOrders - totalPackedOrders) < 0 ? 0 : (totalOrders - totalPackedOrders)} orders is remaining",
+            )
           ],
         )));
   }
 
   // Count the total number of orders packed today
- Future<void> countPackedOrders() async {
+  Future<void> countPackedOrders() async {
     // Fetch the total packed orders
     final orders = await fetchOrderByPackedStatus('Order Packed');
 
@@ -124,9 +126,7 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
     return timeSlots;
   }
 
-
   Future<int> fetchTotalOrders() async {
-    
     try {
       CollectionReference ordersCollection =
           FirebaseFirestore.instance.collection('Orders');
@@ -149,7 +149,7 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
               .isAfter(DateTime.parse(timeSlots['breakfast']['startTime'])) &&
           DateTime.parse(currentTime)
               .isBefore(DateTime.parse(timeSlots['breakfast']['endTime']))) {
-                print('Current Time: ${DateTime.parse(currentTime)}');
+        print('Current Time: ${DateTime.parse(currentTime)}');
         if (profileType == "Child") {
           QuerySnapshot querySnapshot = await ordersCollection
               .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
@@ -276,7 +276,7 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
 
       return ordersList;
     } catch (e) {
-      print("Error fetching order references: $e");
+      print("Error fetching order count references: $e");
       return [];
     }
   }
