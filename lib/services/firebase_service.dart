@@ -7,6 +7,7 @@ class FirebaseService {
   final CollectionReference timeCollection = FirebaseFirestore.instance.collection('Time');
 
 
+
 Future<Map<String, dynamic>> fetchTimeForScanning() async {
     CollectionReference timeCollection =
         FirebaseFirestore.instance.collection('Time');
@@ -59,6 +60,7 @@ Future<Map<String, dynamic>> fetchTimeForScanning() async {
 
 Future<int> fetchTotalOrders(int totalOrders, String profileType) async {
     
+
     try {
       CollectionReference ordersCollection =
           FirebaseFirestore.instance.collection('Orders');
@@ -81,7 +83,7 @@ Future<int> fetchTotalOrders(int totalOrders, String profileType) async {
               .isAfter(DateTime.parse(timeSlots['breakfast']['startTime'])) &&
           DateTime.parse(currentTime)
               .isBefore(DateTime.parse(timeSlots['breakfast']['endTime']))) {
-                print('Current Time: ${DateTime.parse(currentTime)}');
+        print('Current Time: ${DateTime.parse(currentTime)}');
         if (profileType == "Child") {
           QuerySnapshot querySnapshot = await ordersCollection
               .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
@@ -208,7 +210,7 @@ Future<List<Map<String, dynamic>>> fetchOrderByPackedStatus(
 
       return ordersList;
     } catch (e) {
-      print("Error fetching order references: $e");
+      print("Error fetching order count references: $e");
       return [];
     }
   }
