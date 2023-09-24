@@ -1,5 +1,4 @@
-import 'auth_manager.dart';
-import 'packed_qr_view.dart'; 
+import 'auth_manager.dart'; 
 import 'package:flutter/material.dart';
 import 'package:tb_deliveryapp/bgWidget.dart';
 import 'package:tb_deliveryapp/home_page.dart';

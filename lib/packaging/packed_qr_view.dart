@@ -95,7 +95,7 @@ class _PackedQRViewState extends State<PackedQRView> {
           Container(
             margin: const EdgeInsets.all(8),
             child: ElevatedButton(
-              onPressed: result != null && scannedOrderDetails.isNotEmpty// Use the stored orderDetails variable
+              onPressed: result != null && scannedOrderDetails.isNotEmpty // Use the stored orderDetails variable
                   ? () async {
                       await controller?.pauseCamera();
                       result = null;
@@ -131,7 +131,7 @@ class _PackedQRViewState extends State<PackedQRView> {
                   : () => {
                         print(
                             'Button is disabled and barcodeResult = result = $result and {$scannedOrderDetails}'),
-                            print(scannedOrderDetails.isNotEmpty),
+                        print(scannedOrderDetails.isNotEmpty),
                         result = null,
                       },
               style: ElevatedButton.styleFrom(
@@ -234,10 +234,29 @@ class _PackedQRViewState extends State<PackedQRView> {
     super.dispose();
   }
 
+  // Get current time in hh:mm:ss format
+  String getCurrentTime() {
+    DateTime now = DateTime.now();
+    String formattedTime = "${now.hour}:${now.minute}:${now.second}";
+    return formattedTime;
+  }
+
   Future<List<Map<String, dynamic>>> fetchOrderReferencesByPid(pid) async {
     try {
+      // CollectionReference usersCollection =
+      //     FirebaseFirestore.instance.collection('Users');
+
+      // Reference to the specific user document using 'pid'
+      // DocumentReference userDocRef = usersCollection.doc(pid);
+
+      // // Reference to the 'Profiles' subcollection for the specific user
+      // CollectionReference profilesCollection =
+      //     userDocRef.collection('Profiles');
+  
+
       CollectionReference ordersCollection =
           FirebaseFirestore.instance.collection('Orders');
+
       DateTime currentDate = DateTime.now();
       int year = currentDate.year; // Year component
       int month = currentDate.month; // Month component (1 to 12)
@@ -248,12 +267,14 @@ class _PackedQRViewState extends State<PackedQRView> {
       DateTime nextDate = currentDate.add(const Duration(days: 1));
       print('Current Date: $currentDate');
       print('Next Date: $nextDate');
-      QuerySnapshot querySnapshot = await ordersCollection
+      QuerySnapshot ordersQuerySnapshot = await ordersCollection
           .where('pid', isEqualTo: pid)
           .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
           .where('deliveryDate', isLessThan: nextDate)
           .get();
-      querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
+
+      ordersQuerySnapshot.docs
+          .forEach((QueryDocumentSnapshot documentSnapshot) {
         // Get the reference of each document
         DocumentReference documentReference = documentSnapshot.reference;
 
@@ -261,11 +282,54 @@ class _PackedQRViewState extends State<PackedQRView> {
         // For example, you can print the path of the document:
         print('Document Path: ${documentReference.path}');
       });
+      // if (getCurrentTime() >= '06:00:00' && getCurrentTime() <= '8:00:00') {
+      //   print('Good Morning');
+      //   if (profileType == Adult) {
+      //     fetchOrderReferencesByPid(pid, orderType = Breakfast);
+      //   } else {
+      //     fetchOrderReferencesByPid(pid, orderType = Breakfast + Lunch);
+      //   }
+      // } else if (getCurrentTime() >= '08:00:00' &&
+      //     getCurrentTime() <= '11:00:00') {
+      //   print('Good Afternoon');z
+      //   fetchOrderReferencesByPid(pid, orderType = Lunch);
+      // } else if (getCurrentTime() >= '14:00:00' &&
+      //     getCurrentTime() <= '18:00:00') {
+      //   print('Good Evening');
+      //   fetchOrderReferencesByPid(pid, orderType = Dinner);
+      // } else {
+      //   print('Good Night');
+      // }
 
       List<Map<String, dynamic>> ordersList = [];
-      querySnapshot.docs.forEach((documentSnapshot) {
+      ordersQuerySnapshot.docs.forEach((documentSnapshot) {
         Map<String, dynamic> data =
             documentSnapshot.data() as Map<String, dynamic>;
+
+        //print data
+        // print('data: $data');
+        // if (getCurrentTime() >= '06:00:00' && getCurrentTime() <= '8:00:00') {
+        //   if (data['profileType'] == "Adult" &&
+        //       data['orderType'] == "Breakfast") {
+        //     String orderType = data['orderType'];
+        //   } else if (data['profileType'] == "Child" &&
+        //       (data['orderType'] == "Breakfast" ||
+        //           data['orderType'] == "Lunch")) {
+        //     String orderType = data['orderType'];
+        //   }
+        // } else if (getCurrentTime() >= '08:15:00' &&
+        //     getCurrentTime() <= '11:00:00') {
+        //   if (data['orderType'] == "Lunch") {
+        //     String orderType = data['orderType'];
+        //   }
+        // } else if (getCurrentTime() >= '14:00:00' &&
+        //     getCurrentTime() <= '18:00:00') {
+        //   if (data['orderType'] == "Dinner") {
+        //     String orderType = data['orderType'];
+        //   }
+        // } else {
+        //   print('Good Night');
+        // }
         String orderName = data['orderName'];
         int quantity = data['numberOfItems'];
         String orderType = data['orderType'];
@@ -283,7 +347,7 @@ class _PackedQRViewState extends State<PackedQRView> {
 
       return ordersList;
     } catch (e) {
-        print("Error fetching order references: $e");
+      print("Error fetching order references: $e");
       return [];
     }
   }

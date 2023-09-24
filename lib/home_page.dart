@@ -2,7 +2,11 @@ import 'auth_manager.dart';
 import 'delivered_qr_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:tb_deliveryapp/packed_qr_view.dart';
+import 'package:tb_deliveryapp/packaging/count_packed.dart';
+import 'package:tb_deliveryapp/packaging/packed_qr_view.dart';
+
+
+
 
 
 
@@ -45,7 +49,7 @@ class _HomeViewState extends State<HomeView> {
             const Text('Please select an option below'),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) =>  PackedQRView()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) =>  CountPackedOrders()));
               },
               child: const Text('Packed'),
             ),
