@@ -1,7 +1,7 @@
-import 'auth_manager.dart'; 
+import '../services/auth_manager.dart'; 
 import 'package:flutter/material.dart';
-import 'package:tb_deliveryapp/bgWidget.dart';
-import 'package:tb_deliveryapp/home_page.dart';
+import 'package:tb_deliveryapp/widgets/bgWidget.dart';
+import 'package:tb_deliveryapp/views/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 

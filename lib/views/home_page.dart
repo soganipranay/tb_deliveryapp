@@ -1,9 +1,9 @@
-import 'auth_manager.dart';
+import '../services/auth_manager.dart';
 import 'delivered_qr_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:tb_deliveryapp/packaging/count_packed.dart';
-import 'package:tb_deliveryapp/packaging/packed_qr_view.dart';
+import 'package:tb_deliveryapp/views/packaging/count_packed.dart';
+import 'package:tb_deliveryapp/views/packaging/packed_qr_view.dart';
 
 
 

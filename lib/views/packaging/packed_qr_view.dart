@@ -1,18 +1,15 @@
 import 'dart:io';
 import 'dart:developer';
-import 'auth_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class DeliveredQRView extends StatefulWidget {
-  const DeliveredQRView({Key? key}) : super(key: key);
-
+class PackedQRView extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => _DeliveredQRViewState();
+  State<StatefulWidget> createState() => _PackedQRViewState();
 }
 
-class _DeliveredQRViewState extends State<DeliveredQRView> {
+class _PackedQRViewState extends State<PackedQRView> {
   Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
@@ -33,7 +30,7 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Delivered'),
+        title: const Text('Packaging'),
         leading: Padding(
           padding: const EdgeInsets.all(6.0),
           child: Image.asset(
@@ -98,29 +95,22 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
           Container(
             margin: const EdgeInsets.all(8),
             child: ElevatedButton(
-              onPressed: result != null &&
-                      scannedOrderDetails
-                          .isNotEmpty // Use the stored orderDetails variable
+              onPressed: result != null && scannedOrderDetails.isNotEmpty // Use the stored orderDetails variable
                   ? () async {
                       await controller?.pauseCamera();
                       result = null;
                       for (var orderItem in scannedOrderDetails) {
-                        if (orderItem['orderStatus'] == 'Order Packed') {
+                        if (orderItem['orderStatus'] == 'Pending') {
                           await updateOrderStatus(
-                              orderItem['orderRef'], 'Order Delivered');
-                          print("Order Delivered: ${orderItem['orderRef']}");
-                        }
-                        else if (orderItem['orderStatus'] == 'Order Delivered') {
-                          // Dissable the ElevatedButton
-                          print('Order already Delivered');
+                              orderItem['orderRef'], 'Order Packed');
+                          print("Order Packed: ${orderItem['orderRef']}");
                         } else {
                           // ignore: use_build_context_synchronously
                           showDialog(
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
-                                    title:
-                                        const Text('Order already Delivered'),
+                                    title: const Text('Order already packed'),
                                     content: Text(orderItem['orderRef']),
                                     actions: <Widget>[
                                       ElevatedButton(
@@ -150,7 +140,7 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                 minimumSize: const Size(100, 40),
                 textStyle: const TextStyle(fontSize: 14),
               ),
-              child: const Text('Delivered', style: TextStyle(fontSize: 10)),
+              child: const Text('Packed', style: TextStyle(fontSize: 10)),
             ),
           ),
         ],
@@ -244,10 +234,29 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
     super.dispose();
   }
 
+  // Get current time in hh:mm:ss format
+  String getCurrentTime() {
+    DateTime now = DateTime.now();
+    String formattedTime = "${now.hour}:${now.minute}:${now.second}";
+    return formattedTime;
+  }
+
   Future<List<Map<String, dynamic>>> fetchOrderReferencesByPid(pid) async {
     try {
+      // CollectionReference usersCollection =
+      //     FirebaseFirestore.instance.collection('Users');
+
+      // Reference to the specific user document using 'pid'
+      // DocumentReference userDocRef = usersCollection.doc(pid);
+
+      // // Reference to the 'Profiles' subcollection for the specific user
+      // CollectionReference profilesCollection =
+      //     userDocRef.collection('Profiles');
+  
+
       CollectionReference ordersCollection =
           FirebaseFirestore.instance.collection('Orders');
+
       DateTime currentDate = DateTime.now();
       int year = currentDate.year; // Year component
       int month = currentDate.month; // Month component (1 to 12)
@@ -258,12 +267,14 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
       DateTime nextDate = currentDate.add(const Duration(days: 1));
       print('Current Date: $currentDate');
       print('Next Date: $nextDate');
-      QuerySnapshot querySnapshot = await ordersCollection
+      QuerySnapshot ordersQuerySnapshot = await ordersCollection
           .where('pid', isEqualTo: pid)
           .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
           .where('deliveryDate', isLessThan: nextDate)
           .get();
-      querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
+
+      ordersQuerySnapshot.docs
+          .forEach((QueryDocumentSnapshot documentSnapshot) {
         // Get the reference of each document
         DocumentReference documentReference = documentSnapshot.reference;
 
@@ -271,11 +282,54 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
         // For example, you can print the path of the document:
         print('Document Path: ${documentReference.path}');
       });
+      // if (getCurrentTime() >= '06:00:00' && getCurrentTime() <= '8:00:00') {
+      //   print('Good Morning');
+      //   if (profileType == Adult) {
+      //     fetchOrderReferencesByPid(pid, orderType = Breakfast);
+      //   } else {
+      //     fetchOrderReferencesByPid(pid, orderType = Breakfast + Lunch);
+      //   }
+      // } else if (getCurrentTime() >= '08:00:00' &&
+      //     getCurrentTime() <= '11:00:00') {
+      //   print('Good Afternoon');z
+      //   fetchOrderReferencesByPid(pid, orderType = Lunch);
+      // } else if (getCurrentTime() >= '14:00:00' &&
+      //     getCurrentTime() <= '18:00:00') {
+      //   print('Good Evening');
+      //   fetchOrderReferencesByPid(pid, orderType = Dinner);
+      // } else {
+      //   print('Good Night');
+      // }
 
       List<Map<String, dynamic>> ordersList = [];
-      querySnapshot.docs.forEach((documentSnapshot) {
+      ordersQuerySnapshot.docs.forEach((documentSnapshot) {
         Map<String, dynamic> data =
             documentSnapshot.data() as Map<String, dynamic>;
+
+        //print data
+        // print('data: $data');
+        // if (getCurrentTime() >= '06:00:00' && getCurrentTime() <= '8:00:00') {
+        //   if (data['profileType'] == "Adult" &&
+        //       data['orderType'] == "Breakfast") {
+        //     String orderType = data['orderType'];
+        //   } else if (data['profileType'] == "Child" &&
+        //       (data['orderType'] == "Breakfast" ||
+        //           data['orderType'] == "Lunch")) {
+        //     String orderType = data['orderType'];
+        //   }
+        // } else if (getCurrentTime() >= '08:15:00' &&
+        //     getCurrentTime() <= '11:00:00') {
+        //   if (data['orderType'] == "Lunch") {
+        //     String orderType = data['orderType'];
+        //   }
+        // } else if (getCurrentTime() >= '14:00:00' &&
+        //     getCurrentTime() <= '18:00:00') {
+        //   if (data['orderType'] == "Dinner") {
+        //     String orderType = data['orderType'];
+        //   }
+        // } else {
+        //   print('Good Night');
+        // }
         String orderName = data['orderName'];
         int quantity = data['numberOfItems'];
         String orderType = data['orderType'];

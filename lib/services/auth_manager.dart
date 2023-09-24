@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'login_page.dart';
+import '../views/login_page.dart';
 
 // Function to store user login state
 Future<void> saveUserLoggedIn(bool isLoggedIn) async {
