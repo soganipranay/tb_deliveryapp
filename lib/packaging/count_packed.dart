@@ -11,13 +11,12 @@ class CountPackedOrders extends StatefulWidget {
 
 class _CountPackedOrdersState extends State<CountPackedOrders> {
   late String profileType;
-  late int totalOrders;
-  int y = 0;
-
+  late int totalPackedOrders;
+  late int totalOrders = 0;
   @override
   void initState() {
     super.initState();
-    y = countPackedOrders() as int;
+    countPackedOrders(); // Call the function to fetch the data
   }
 
   @override
@@ -38,34 +37,30 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
             child: Column(
           children: [
             Text('Welcome to Tummy Box Partner App'),
+            Text('You have total of $fetchTotalOrders orders to pack today'),
             // if(y>0):
             ElevatedButton(
               onPressed: () {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => PackedQRView()));
               },
-              child: countPackedOrders(),
+              child: Text('You have packed $totalPackedOrders orders today'),
             ),
             Text(
-                "You have packed $countPackedOrders orders today and y orders is remaining"),
+                "You have packed $totalPackedOrders orders today and y orders is remaining"),
           ],
         )));
   }
 
   // Count the total number of orders packed today
-  Widget countPackedOrders() {
-    return FutureBuilder(
-        future: fetchOrderByPackedStatus('Order Packed'),
-        builder: (context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
-          if (snapshot.hasData) {
-            snapshot.docs.
-            List<Map<String, dynamic>> ordersList = snapshot.data!;
-            int totalOrders = ordersList.length;
-            return Text('You have packed $totalOrders orders today');
-          } else {
-            return Text('You have packed 0 orders today');
-          }
-        });
+ Future<void> countPackedOrders() async {
+    // Fetch the total packed orders
+    final orders = await fetchOrderByPackedStatus('Order Packed');
+
+    setState(() {
+      // Update the totalPackedOrders variable and trigger a UI update
+      totalPackedOrders = orders.length;
+    });
   }
 
   String getCurrentTime() {
@@ -117,7 +112,7 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
   }
 
   Future<int> fetchTotalOrders() async {
-    int totalOrders = 0;
+    
     try {
       CollectionReference ordersCollection =
           FirebaseFirestore.instance.collection('Orders');
@@ -208,11 +203,6 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
         });
       }
 
-      // if (querySnapshot.hasData) {
-      //   List<Map<String, dynamic>> ordersList = querySnapshot.data!;
-      //   int totalOrders = ordersList.length;
-      //   return Text('You have packed $totalOrders orders today');
-      // }
       print('Total Orders: $totalOrders');
       return totalOrders;
     } catch (e) {
