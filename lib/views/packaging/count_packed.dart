@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tb_deliveryapp/views/packaging/packed_qr_view.dart';
 import 'package:tb_deliveryapp/services/firebase_service.dart';
+import 'package:tb_deliveryapp/views/packaging/packed_qr_view.dart';
 
 class CountPackedOrders extends StatefulWidget {
   CountPackedOrders({Key? key}) : super(key: key);
@@ -11,9 +11,9 @@ class CountPackedOrders extends StatefulWidget {
 }
 
 class _CountPackedOrdersState extends State<CountPackedOrders> {
-    final FirebaseService firebaseService = FirebaseService();
+  final FirebaseService firebaseService = FirebaseService();
 
-  late String profileType="";
+  late String profileType = "";
   late int totalPackedOrders = 0;
   late int totalOrders = 0;
   @override
@@ -55,24 +55,20 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
               child: Text('You have packed $totalPackedOrders orders today'),
             ),
             Text(
-                "You have packed $totalPackedOrders orders today and ${totalOrders - totalPackedOrders} orders is remaining"),
+                "You have packed $totalPackedOrders orders today and ${(totalOrders - totalPackedOrders) < 0 ? 0 : (totalOrders - totalPackedOrders)} orders is remaining"),
           ],
         )));
   }
 
   // Count the total number of orders packed today
- Future<void> countPackedOrders() async {
+  Future<void> countPackedOrders() async {
     // Fetch the total packed orders
-    final orders = await firebaseService.fetchOrderByPackedStatus('Order Packed');
+    final orders =
+        await firebaseService.fetchOrderByPackedStatus('Order Packed');
 
     setState(() {
       // Update the totalPackedOrders variable and trigger a UI update
       totalPackedOrders = orders.length;
     });
   }
-
-
-
-  
-  
 }
