@@ -8,7 +8,7 @@ class FirebaseService {
       FirebaseFirestore.instance.collection('Time');
 
   Future<Map<String, dynamic>> fetchOrderReferencesByPid(
-      pid, String profileType, String orderType, String orderStatus, String location) async {
+      pid, String profileType, String orderType, String orderStatus) async {
     try {
       final ordersCollection = FirebaseFirestore.instance.collection('Orders');
       final currentDate = DateTime.now();
