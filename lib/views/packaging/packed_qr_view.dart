@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tb_deliveryapp/services/firebase_service.dart';
 
 class PackedQRView extends StatefulWidget {
   @override
@@ -10,6 +11,7 @@ class PackedQRView extends StatefulWidget {
 }
 
 class _PackedQRViewState extends State<PackedQRView> {
+  FirebaseService firebaseService = FirebaseService();
   Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
@@ -53,7 +55,7 @@ class _PackedQRViewState extends State<PackedQRView> {
           Expanded(
             child: result != null
                 ? FutureBuilder<List<Map<String, dynamic>>>(
-                    future: fetchOrderReferencesByPid(result!.code.toString()),
+                    future: firebaseService.fetchOrderReferencesByPid(result!.code.toString(), profileType),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const CircularProgressIndicator(
@@ -96,7 +98,7 @@ class _PackedQRViewState extends State<PackedQRView> {
                       result = null;
                       for (var orderItem in scannedOrderDetails) {
                         if (orderItem['orderStatus'] == 'Pending') {
-                          await updateOrderStatus(orderItem['orderRef'], 'Order Packed');
+                          await firebaseService.updateOrderStatus(orderItem['orderRef'], 'Order Packed');
                           print("Order Packed: ${orderItem['orderRef']}");
                         } else {
                           showDialog(
@@ -176,149 +178,7 @@ class _PackedQRViewState extends State<PackedQRView> {
     }
   }
 
-  Future<void> updateOrderStatus(String orderId, String newStatus) async {
-    try {
-      final ordersCollection = FirebaseFirestore.instance.collection('Orders');
-      final orderDocRef = ordersCollection.doc(orderId);
 
-      await orderDocRef.update({'Status': newStatus});
-      print('Order status updated to: $newStatus');
-    } catch (e) {
-      print('Error updating order status: $e');
-    }
-  }
-
-  String getCurrentTime() {
-    final now = DateTime.now();
-    return "${now.hour}:${now.minute}:${now.second}";
-  }
-
-
-  Future<Map<String, dynamic>> fetchTimeForScanning() async {
-    final timeCollection = FirebaseFirestore.instance.collection('Time');
-
-    final timeDocs = await timeCollection.get();
-
-    final Map<String, dynamic> timeSlots = {};
-    String timestampToFormattedTime(Timestamp timestamp) {
-      DateTime dateTime = timestamp.toDate();
-      String formattedTime =
-          "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}:${dateTime.second.toString().padLeft(2, '0')}";
-      return formattedTime;
-    }
-
-    timeDocs.docs.forEach((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      final slotName = doc.id;
-      timeSlots[slotName] = {
-        'startTime': timestampToFormattedTime(data['StartTime']),
-        'endTime': timestampToFormattedTime(data['EndTime']),
-      };
-    });
-
-    print('Time Slots: $timeSlots');
-    return timeSlots;
-  }
-
-  Future<List<Map<String, dynamic>>> fetchOrderReferencesByPid(pid) async {
-    try {
-      List<Map<String, dynamic>> ordersList = [];
-      CollectionReference ordersCollection =
-          FirebaseFirestore.instance.collection('Orders');
-
-      DateTime currentDate = DateTime.now();
-      DateTime nextDate = currentDate.add(const Duration(days: 1));
-      print('Current Date: $currentDate');
-      print('Next Date: $nextDate');
-
-      Map<String, dynamic> timeSlots = await fetchTimeForScanning();
-      String currentTime = getCurrentTime();
-
-      if (DateTime.now().hour >=
-              int.parse(timeSlots['breakfast']['startTime'].split(':')[0]) &&
-          DateTime.now().minute >=
-              int.parse(timeSlots['breakfast']['startTime'].split(':')[1]) &&
-          DateTime.now().hour <
-              int.parse(timeSlots['breakfast']['endTime'].split(':')[0]) &&
-          DateTime.now().minute <
-              int.parse(timeSlots['breakfast']['endTime'].split(':')[1])) {
-        if (profileType == "Child") {
-          ordersList.addAll(await fetchOrders(ordersCollection, pid,
-              currentDate, nextDate, ['breakfast', 'lunch'], profileType));
-        }
-      } else if (profileType == "Adult") {
-        ordersList.addAll(await fetchOrders(ordersCollection, pid, currentDate,
-            nextDate, ['breakfast'], profileType));
-      } else if (DateTime.now().hour >=
-              int.parse(timeSlots['lunch']['startTime'].split(':')[0]) &&
-          DateTime.now().minute >=
-              int.parse(timeSlots['lunch']['startTime'].split(':')[1]) &&
-          DateTime.now().hour <
-              int.parse(timeSlots['lunch']['endTime'].split(':')[0]) &&
-          DateTime.now().minute <
-              int.parse(timeSlots['lunch']['endTime'].split(':')[1])) {
-        ordersList.addAll(await fetchOrders(
-            ordersCollection, pid, currentDate, nextDate, ['lunch'], 'Adult'));
-      } else if (DateTime.now().hour >=
-              int.parse(timeSlots['dinner']['startTime'].split(':')[0]) &&
-          DateTime.now().minute >=
-              int.parse(timeSlots['dinner']['startTime'].split(':')[1]) &&
-          DateTime.now().hour <
-              int.parse(timeSlots['dinner']['endTime'].split(':')[0]) &&
-          DateTime.now().minute <
-              int.parse(timeSlots['dinner']['endTime'].split(':')[1])) {
-        ordersList.addAll(await fetchOrders(
-            ordersCollection, pid, currentDate, nextDate, ['dinner'], 'Adult'));
-      } else {
-        print('No orders found');
-      }
-
-      return ordersList;
-    } catch (e) {
-      print("Error fetching order references: $e");
-      return [];
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> fetchOrders(
-      CollectionReference ordersCollection,
-      String pid,
-      DateTime currentDate,
-      DateTime nextDate,
-      List<String> orderTypes,
-      String profileType) async {
-    List<Map<String, dynamic>> ordersList = [];
-    QuerySnapshot ordersQuerySnapshot = await ordersCollection
-        .where('pid', isEqualTo: pid)
-        .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
-        .where('deliveryDate', isLessThan: nextDate)
-        .where('orderType', whereIn: orderTypes)
-        .where('profileType', isEqualTo: profileType)
-        .get();
-
-    ordersQuerySnapshot.docs.forEach((documentSnapshot) {
-      DocumentReference documentReference = documentSnapshot.reference;
-      print('Document Path: ${documentReference.path}');
-      Map<String, dynamic> data =
-          documentSnapshot.data() as Map<String, dynamic>;
-
-      String orderName = data['orderName'];
-      int quantity = data['numberOfItems'];
-      String orderType = data['orderType'];
-      String orderStatus = data['Status'];
-
-      Map<String, dynamic> orderMap = {
-        'orderName': orderName,
-        'quantity': quantity,
-        'orderType': orderType,
-        'orderRef': documentSnapshot.reference.id,
-        'orderStatus': orderStatus
-      };
-      ordersList.add(orderMap);
-    });
-
-    return ordersList;
-  }
 
   @override
   void dispose() {

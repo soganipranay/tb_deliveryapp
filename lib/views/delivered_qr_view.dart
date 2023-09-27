@@ -1,18 +1,21 @@
 import 'dart:io';
 import 'dart:developer';
-import 'auth_manager.dart';
+import '../services/auth_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tb_deliveryapp/services/firebase_service.dart';
 
 class DeliveredQRView extends StatefulWidget {
-  const DeliveredQRView({Key? key}) : super(key: key);
+  final String meal;
+  const DeliveredQRView({Key? key, required this.meal}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _DeliveredQRViewState();
 }
 
 class _DeliveredQRViewState extends State<DeliveredQRView> {
+  final FirebaseService firebaseService = FirebaseService();
   Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
@@ -106,11 +109,11 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                       result = null;
                       for (var orderItem in scannedOrderDetails) {
                         if (orderItem['orderStatus'] == 'Order Packed') {
-                          await updateOrderStatus(
+                          await firebaseService.updateOrderStatus(
                               orderItem['orderRef'], 'Order Delivered');
                           print("Order Delivered: ${orderItem['orderRef']}");
-                        }
-                        else if (orderItem['orderStatus'] == 'Order Delivered') {
+                        } else if (orderItem['orderStatus'] ==
+                            'Order Delivered') {
                           // Dissable the ElevatedButton
                           print('Order already Delivered');
                         } else {
@@ -197,19 +200,6 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('no Permission')),
       );
-    }
-  }
-
-  Future<void> updateOrderStatus(String orderId, String newStatus) async {
-    try {
-      CollectionReference ordersCollection =
-          FirebaseFirestore.instance.collection('Orders');
-      DocumentReference orderDocRef = ordersCollection.doc(orderId);
-
-      await orderDocRef.update({'Status': newStatus});
-      print('Order status updated to: $newStatus');
-    } catch (e) {
-      print('Error updating order status: $e');
     }
   }
 

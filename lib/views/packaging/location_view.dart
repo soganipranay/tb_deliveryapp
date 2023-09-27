@@ -95,7 +95,7 @@ class LocationList extends StatelessWidget {
           .where('deliveryDate', isGreaterThanOrEqualTo: currentDateStart)
           .where('deliveryDate', isLessThan: currentDateEnd)
           .where('Status', isEqualTo: orderStatus)
-          .where('location', isEqualTo: locationName)
+          // .where('location', isEqualTo: locationName)
           .get();
       final totalOrders = querySnapshot.size;
       
