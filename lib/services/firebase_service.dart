@@ -130,7 +130,7 @@ Future<List<Map<String, dynamic>>> fetchOrderByPackedStatus(
       querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
         // Get the reference of each document
         DocumentReference documentReference = documentSnapshot.reference;
-
+  
         // Now, you can use this reference as needed
         // For example, you can print the path of the document:
         print('Document Path: ${documentReference.path}');

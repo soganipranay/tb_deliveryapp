@@ -31,14 +31,7 @@ class _HomeViewState extends State<HomeView> {
             height: 40, // Adjust the height as needed
           ),
         ),
-        actions: [
-          if (widget.isLoggedIn) // Use the isLoggedIn value here
-            IconButton(
-              onPressed: () =>
-                  logoutUser(context), // Call the logoutUser function
-              icon: const Icon(Icons.logout),
-            ),
-        ],
+       
       ),
       // add buttons to redirect to packed and delivered pages
 

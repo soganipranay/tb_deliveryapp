@@ -11,37 +11,17 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+final AuthManager _authManager = AuthManager();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  Future<void> _signInWithEmailAndPassword() async {
-    try {
-      final String email = _emailController.text.trim();
-      final String password = _passwordController.text;
-
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      User? user = userCredential.user;
-      if (user != null) {
-        // Successfully logged in
-        print('User ID: ${user.uid}');
-        await saveUserLoggedIn(true); // Store login state
-        Navigator.of(context).pushReplacement(MaterialPageRoute
-                    (
-                      builder: (context) => const HomeView(isLoggedIn: true),
-                    ));
-      } else {
-        // Failed to log in
-        print('Failed to log in');
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
+  void _signIn() {
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+    _authManager.signInWithEmailAndPassword(email, password, context);
   }
+ 
   
   @override
   Widget build(BuildContext context) {
@@ -103,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 30),
                   ElevatedButton(
-                    onPressed: _signInWithEmailAndPassword,
+                    onPressed: _signIn,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                       padding: const EdgeInsets.symmetric(
