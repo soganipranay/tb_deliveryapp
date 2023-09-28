@@ -1,3 +1,5 @@
+import 'package:tb_deliveryapp/services/firebase_service.dart';
+
 import '../services/auth_manager.dart';
 import 'delivered_qr_view.dart';
 import 'package:flutter/material.dart';

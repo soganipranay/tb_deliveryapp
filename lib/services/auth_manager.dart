@@ -1,12 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tb_deliveryapp/services/firebase_service.dart';
 import 'package:tb_deliveryapp/views/home_page.dart';
 
 import '../views/login_page.dart';
 
 class AuthManager{
-
+  FirebaseService firebaseService = FirebaseService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
 Future<void> signInWithEmailAndPassword(
@@ -17,6 +18,7 @@ Future<void> signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+
       // Successful Sign In
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => const HomeView(isLoggedIn: true),
