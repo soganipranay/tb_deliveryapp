@@ -1,6 +1,3 @@
-import 'package:tb_deliveryapp/services/firebase_service.dart';
-
-import '../services/auth_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:tb_deliveryapp/views/process_view.dart';
 

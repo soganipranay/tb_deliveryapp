@@ -1,8 +1,6 @@
-import '../services/auth_manager.dart'; 
 import 'package:flutter/material.dart';
+import '../services/auth_manager.dart'; 
 import 'package:tb_deliveryapp/widgets/bgWidget.dart';
-import 'package:tb_deliveryapp/views/home_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 
 class LoginPage extends StatefulWidget {

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tb_deliveryapp/services/firebase_service.dart';
 import 'package:tb_deliveryapp/views/packaging/location_view.dart';
 import 'package:tb_deliveryapp/views/packaging/packed_qr_view.dart';
