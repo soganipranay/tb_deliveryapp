@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirebaseService {
   final CollectionReference ordersCollection = FirebaseFirestore.instance.collection('Orders');
   final CollectionReference timeCollection = FirebaseFirestore.instance.collection('Time');
+  final CollectionReference deliveryPartners = FirebaseFirestore.instance.collection('DeliveryPartners');
 
 
 
@@ -130,7 +131,7 @@ Future<List<Map<String, dynamic>>> fetchOrderByPackedStatus(
       querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
         // Get the reference of each document
         DocumentReference documentReference = documentSnapshot.reference;
-
+  
         // Now, you can use this reference as needed
         // For example, you can print the path of the document:
         print('Document Path: ${documentReference.path}');
@@ -295,4 +296,38 @@ Future<Map<String, dynamic>> fetchTimeForScanning() async {
 
     return ordersList;
   }
+
+Future<String?> getDeliveryPartnerId(String userEmail) async {
+    try {
+      QuerySnapshot querySnapshot = await deliveryPartners
+          .where('partner_email', isEqualTo: userEmail).get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Assuming that userEmail is unique and only one document will match
+        DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
+        return documentSnapshot.id;  // Return the document id
+      } else {
+        print('No matching deliveryId found');
+        return null;
+      }
+    } catch (e) {
+      print('Error: $e');
+      return null;
+    }
+  }
+
+  Future<List<dynamic>?> getDeliveryLocationsForPartnerId(String deliveryPartnerId) async {
+    try {
+      DocumentReference docRef = deliveryPartners.doc(deliveryPartnerId);
+       DocumentSnapshot docSnapshot = await docRef.get();
+       List<dynamic> locationsForDeliveryPartner = List<dynamic>.from(docSnapshot['partner_locationID'] ?? []);
+    return locationsForDeliveryPartner;
+    } catch (e) {
+      print('Error: $e');
+      return null;
+    }
+  }
+
+  
+
 }
