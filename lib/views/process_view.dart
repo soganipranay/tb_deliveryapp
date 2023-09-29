@@ -1,15 +1,44 @@
+import 'dart:ffi';
 import 'delivered_qr_view.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tb_deliveryapp/services/firebase_service.dart';
 import 'package:tb_deliveryapp/views/packaging/count_packed.dart';
 
 class ProcessView extends StatefulWidget {
-  const ProcessView({Key? key, required this.meal}) : super(key: key);
+  const ProcessView({Key? key, required this.meal, required this.locations})
+      : super(key: key);
   final String meal;
+  final List<dynamic>? locations;
   @override
   State<ProcessView> createState() => _ProcessViewState();
 }
 
 class _ProcessViewState extends State<ProcessView> {
+  List<String>? deliveryPartnerLocationName;
+  @override
+  void initState() {
+    super.initState();
+    initializeData();
+  }
+
+  Future<void> initializeData() async {
+    FirebaseService firebaseService = FirebaseService();
+
+    List<String>? locationName = await firebaseService
+        .fetchLocationNamesByLocationIds(widget.locations?.cast<
+            DocumentReference<Map<String, dynamic>>>()); // Use widget.locations
+
+    if (locationName != null) {
+      List<String> filteredLocationNames =
+          locationName.map((name) => name.replaceAll('Office: ', '')).toList();
+      setState(() {
+        deliveryPartnerLocationName = filteredLocationNames;
+        print("deliveryPartnerLocationsNames $deliveryPartnerLocationName");
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,11 +60,13 @@ class _ProcessViewState extends State<ProcessView> {
           children: [
             ElevatedButton(
               onPressed: () {
+                print(widget.meal);
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>
-                            CountPackedOrders(meal: widget.meal)));
+                        builder: (context) => CountPackedOrders(
+                            meal: widget.meal,
+                            locationNames: deliveryPartnerLocationName)));
               },
               child: const Text('Packaging'),
             ),

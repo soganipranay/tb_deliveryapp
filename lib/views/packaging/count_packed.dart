@@ -5,7 +5,10 @@ import 'package:tb_deliveryapp/views/packaging/packed_qr_view.dart';
 
 class CountPackedOrders extends StatefulWidget {
   final String meal;
-  CountPackedOrders({Key? key , required this.meal}) : super(key: key);
+  final List<String>? locationNames;
+
+  CountPackedOrders({Key? key, required this.meal, required this.locationNames})
+      : super(key: key);
 
   @override
   State<CountPackedOrders> createState() => _CountPackedOrdersState();
@@ -15,13 +18,17 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
   final FirebaseService firebaseService = FirebaseService();
 
   late String profileType = "";
-  late int totalPackedOrders = 0;
+  Map<String, int> locationPackedOrders = {};
+  Map<String, int> locationPendingOrders = {};
+
   late int totalOrders = 0;
   @override
   void initState() {
     super.initState();
     countPackedOrders(); // Call the function to fetch the data
-    firebaseService.fetchTotalOrders(totalOrders, profileType).then((value) {
+    firebaseService
+        .fetchTotalOrders(widget.locationNames, widget.meal)
+        .then((value) {
       setState(() {
         totalOrders = value;
       });
@@ -45,32 +52,38 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
         body: Container(
             child: Column(
           children: [
-            Text('Welcome to Tummy Box Partner App'),
-            Text('You have total of $totalOrders orders to pack today'),
-            // if(y>0):
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => PackedQRView()));
-              },
-              child: Text('You have packed $totalPackedOrders orders today'),
+
+            LocationView(
+              locationNames: widget.locationNames,
+              mealType: widget.meal,
+              locationPackedOrders:
+                  locationPackedOrders, // Pass the location-specific data
+              locationPendingOrders:
+                  locationPendingOrders, // Pass the location-specific data
             ),
-            Text(
-                "You have packed $totalPackedOrders orders today and ${(totalOrders - totalPackedOrders) < 0 ? 0 : (totalOrders - totalPackedOrders)} orders is remaining"),
-            LocationView(),
           ],
         )));
   }
 
   // Count the total number of orders packed today
   Future<void> countPackedOrders() async {
-    // Fetch the total packed orders
-    final orders =
-        await firebaseService.fetchOrderByPackedStatus('Order Packed');
+    for (String location in widget.locationNames ?? []) {
+      // Fetch the total packed orders for the current location
+      final packedOrders = await firebaseService.fetchOrderByOrderStatus(
+          'Order Packed', location, widget.meal);
 
-    setState(() {
-      // Update the totalPackedOrders variable and trigger a UI update
-      totalPackedOrders = orders.length;
-    });
+      // Fetch the total pending orders for the current location
+      final pendingOrders = await firebaseService.fetchOrderByOrderStatus(
+          'Pending', location, widget.meal);
+
+      // Update the locationPackedOrders and locationPendingOrders maps
+      setState(() {
+        locationPackedOrders[location] = packedOrders.length;
+        locationPendingOrders[location] = pendingOrders.length;
+        print(locationPackedOrders );
+        print(locationPendingOrders);
+
+      });
+    }
   }
 }

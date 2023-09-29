@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tb_deliveryapp/main.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tb_deliveryapp/views/home_page.dart';
 // This is a basic Flutter widget test.

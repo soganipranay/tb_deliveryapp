@@ -7,7 +7,7 @@ class FirebaseService {
       FirebaseFirestore.instance.collection('Time');
 
   Future<Map<String, dynamic>> fetchOrderByOrderStatus(
-      String orderStatus, String location, String orderType) async {
+      String orderStatus, List<String>? location, String orderType) async {
     try {
       final ordersCollection = FirebaseFirestore.instance.collection('Orders');
       final currentDate = DateTime.now();
@@ -18,10 +18,10 @@ class FirebaseService {
       final currentDateEnd = currentDateStart.add(Duration(days: 1));
 
       final querySnapshot = await ordersCollection
-          .where('deliveryDate', isGreaterThanOrEqualTo: currentDateStart)
-          .where('deliveryDate', isLessThan: currentDateEnd)
+          // .where('deliveryDate', isGreaterThanOrEqualTo: currentDateStart)
+          // .where('deliveryDate', isLessThan: currentDateEnd)
           .where('Status', isEqualTo: orderStatus)
-          .where('location', isEqualTo: location).
+          .where('location', whereIn: [location]).
           where('orderType', isEqualTo: orderType)
           .get();
       final totalOrders = querySnapshot.size;

@@ -1,17 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:tb_deliveryapp/views/process_view.dart';
-
-
+import 'package:tb_deliveryapp/services/firebase_service.dart';
 
 class HomeView extends StatefulWidget {
   final bool isLoggedIn;
-  const HomeView({Key? key, required this.isLoggedIn}) : super(key: key);
+  final String partnerId;
+  const HomeView({Key? key, required this.isLoggedIn, required this.partnerId})
+      : super(key: key);
 
   @override
   State<HomeView> createState() => _HomeViewState();
 }
 
 class _HomeViewState extends State<HomeView> {
+  List<dynamic>? deliveryPartnerLocations = []; // Change the data type here
+
+  @override
+  void initState() {
+    super.initState();
+    initializeData();
+  }
+
+  Future<void> initializeData() async {
+    FirebaseService firebaseService = FirebaseService();
+        print("deliveryPartnerLocations $deliveryPartnerLocations");
+
+    List<dynamic>? locations = await firebaseService
+        .getDeliveryLocationsForPartnerId(widget.partnerId);
+
+    if (locations != null) {
+      setState(() {
+        deliveryPartnerLocations = locations;
+        print("deliveryPartnerLocations $deliveryPartnerLocations");
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,7 +49,6 @@ class _HomeViewState extends State<HomeView> {
             height: 40,
           ),
         ),
-       
       ),
       body: Container(
         child: Column(
@@ -35,7 +58,10 @@ class _HomeViewState extends State<HomeView> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ProcessView(meal: "breakfast"),
+                    builder: (context) => ProcessView(
+                      meal: "breakfast",
+                      locations: deliveryPartnerLocations,
+                    ),
                   ),
                 );
               },
@@ -46,7 +72,10 @@ class _HomeViewState extends State<HomeView> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ProcessView(meal: "lunch"),
+                    builder: (context) => ProcessView(
+                      meal: "lunch",
+                      locations: deliveryPartnerLocations,
+                    ),
                   ),
                 );
               },
@@ -57,7 +86,10 @@ class _HomeViewState extends State<HomeView> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ProcessView(meal: "dinner"),
+                    builder: (context) => ProcessView(
+                      meal: "dinner",
+                      locations: deliveryPartnerLocations,
+                    ),
                   ),
                 );
               },

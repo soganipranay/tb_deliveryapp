@@ -1,23 +1,25 @@
 import 'package:tb_deliveryapp/utils/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
 class FirebaseService {
-  final CollectionReference ordersCollection = FirebaseFirestore.instance.collection('Orders');
-  final CollectionReference timeCollection = FirebaseFirestore.instance.collection('Time');
-  final CollectionReference deliveryPartners = FirebaseFirestore.instance.collection('DeliveryPartners');
+  final CollectionReference ordersCollection =
+      FirebaseFirestore.instance.collection('Orders');
+  final CollectionReference timeCollection =
+      FirebaseFirestore.instance.collection('Time');
+  final CollectionReference deliveryPartners =
+      FirebaseFirestore.instance.collection('DeliveryPartners');
+  final CollectionReference officeLocation =
+      FirebaseFirestore.instance.collection('Office');
+  final CollectionReference schoolLocation =
+      FirebaseFirestore.instance.collection('School');
 
-
-
-Future<int> fetchTotalOrders(int totalOrders, String profileType) async {
-    
-
+  Future<int> fetchTotalOrders(List<String>? locations, String orderType) async {
     try {
-    
       DateTime currentDate = DateTime.now();
       int year = currentDate.year; // Year component
       int month = currentDate.month; // Month component (1 to 12)
       int day = currentDate.day; // Day component
+      late int totalOrders = 0;
 
       currentDate = DateTime(year, month, day);
 
@@ -26,143 +28,75 @@ Future<int> fetchTotalOrders(int totalOrders, String profileType) async {
       print('Current Date: $currentDate');
       print('Next Date: $nextDate');
 
-    Map<String, dynamic> timeSlots = await fetchTimeForScanning();
-      String currentTime = Utils.getCurrentTime();
-
-      if (DateTime.parse(currentTime)
-              .isAfter(DateTime.parse(timeSlots['breakfast']['startTime'])) &&
-          DateTime.parse(currentTime)
-              .isBefore(DateTime.parse(timeSlots['breakfast']['endTime']))) {
-        print('Current Time: ${DateTime.parse(currentTime)}');
-        if (profileType == "Child") {
-          QuerySnapshot querySnapshot = await ordersCollection
-              .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
-              .where('deliveryDate', isLessThan: nextDate)
-              .where('orderType', whereIn: ['breakfast', 'lunch'])
-              .where('profileType', isEqualTo: profileType)
-              .get();
-
-          querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
-            // Get the reference of each document
-            DocumentReference documentReference = documentSnapshot.reference;
-            print('Document Path: ${documentReference.path}');
-            // get the count of the documents
-            totalOrders = querySnapshot.docs.length;
-          });
-        } else if (profileType == "Adult") {
-          QuerySnapshot querySnapshot = await ordersCollection
-              .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
-              .where('deliveryDate', isLessThan: nextDate)
-              .where('orderType', isEqualTo: 'breakfast')
-              .where('profileType', isEqualTo: profileType)
-              .get();
-          querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
-            // Get the reference of each document
-            DocumentReference documentReference = documentSnapshot.reference;
-            print('Document Path: ${documentReference.path}');
-            // get the count of the documents
-            totalOrders = querySnapshot.docs.length;
-          });
-        }
-      } else if (DateTime.parse(currentTime)
-              .isAfter(DateTime.parse(timeSlots['lunch']['startTime'])) &&
-          DateTime.parse(currentTime)
-              .isBefore(DateTime.parse(timeSlots['lunch']['endTime']))) {
-        QuerySnapshot querySnapshot = await ordersCollection
-            .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
-            .where('deliveryDate', isLessThan: nextDate)
-            .where('orderType', isEqualTo: 'lunch')
-            .where('profileType', isEqualTo: 'Adult')
-            .get();
-
-        querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
-          // Get the reference of each document
-          DocumentReference documentReference = documentSnapshot.reference;
-          print('Document Path: ${documentReference.path}');
-          // get the count of the documents
-          totalOrders = querySnapshot.docs.length;
-        });
-      } else if (DateTime.parse(currentTime)
-              .isAfter(DateTime.parse(timeSlots['dinner']['startTime'])) &&
-          DateTime.parse(currentTime)
-              .isBefore(DateTime.parse(timeSlots['dinner']['endTime']))) {
-        QuerySnapshot querySnapshot = await ordersCollection
-            .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
-            .where('deliveryDate', isLessThan: nextDate)
-            .where('orderType', isEqualTo: 'dinner')
-            .where('profileType', isEqualTo: 'Adult')
-            .get();
-
-        querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
-          // Get the reference of each document
-          DocumentReference documentReference = documentSnapshot.reference;
-          print('Document Path: ${documentReference.path}');
-          // get the count of the documents
-          totalOrders = querySnapshot.docs.length;
-        });
-      }
-
-      print('Total Orders: $totalOrders');
-      return totalOrders;
-    } catch (e) {
-      print("Error fetching total order references: $e");
-      return totalOrders;
-    }
-  }
-
-Future<List<Map<String, dynamic>>> fetchOrderByPackedStatus(
-      orderStatus) async {
-    try {
-      DateTime currentDate = DateTime.now();
-      int year = currentDate.year; // Year component
-      int month = currentDate.month; // Month component (1 to 12)
-      int day = currentDate.day; // Day component
-
-      currentDate = DateTime(year, month, day);
-
-      DateTime nextDate = currentDate.add(const Duration(days: 1));
-      print('Current Date: $currentDate');
-      print('Next Date: $nextDate');
       QuerySnapshot querySnapshot = await ordersCollection
           .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
           .where('deliveryDate', isLessThan: nextDate)
-          .where('Status', isEqualTo: orderStatus)
-          .get();
+          .where('orderType', isEqualTo: orderType)
+          .where('location', whereIn: [locations]).get();
+
       querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
         // Get the reference of each document
         DocumentReference documentReference = documentSnapshot.reference;
-  
-        // Now, you can use this reference as needed
-        // For example, you can print the path of the document:
         print('Document Path: ${documentReference.path}');
+        // get the count of the documents
+        totalOrders = querySnapshot.docs.length;
+        print('Total Orders: $totalOrders');
+
       });
 
-      List<Map<String, dynamic>> ordersList = [];
-      querySnapshot.docs.forEach((documentSnapshot) {
-        Map<String, dynamic> data =
-            documentSnapshot.data() as Map<String, dynamic>;
-        String orderName = data['orderName'];
-        int quantity = data['numberOfItems'];
-        String orderType = data['orderType'];
-        String orderStatus = data['Status'];
-
-        Map<String, dynamic> orderMap = {
-          'orderName': orderName,
-          'quantity': quantity,
-          'orderType': orderType,
-          'orderRef': documentSnapshot.reference.id,
-          'orderStatus': orderStatus
-        };
-        ordersList.add(orderMap);
-      });
-
-      return ordersList;
+      return totalOrders;
     } catch (e) {
-      print("Error fetching order count references: $e");
-      return [];
+      print("Error fetching total order references: $e");
+      return 0;
     }
   }
-   Future<void> updateOrderStatus(String orderId, String newStatus) async {
+
+  Future<Map<String, dynamic>> fetchOrderByOrderStatus(
+      String orderStatus, String location, String orderType) async {
+    try {
+      final ordersCollection = FirebaseFirestore.instance.collection('Orders');
+      final currentDate = DateTime.now();
+      final year = currentDate.year;
+      final month = currentDate.month;
+      final day = currentDate.day;
+      final currentDateStart = DateTime(year, month, day);
+      final currentDateEnd = currentDateStart.add(Duration(days: 1));
+
+      final querySnapshot = await ordersCollection
+          // .where('deliveryDate', isGreaterThanOrEqualTo: currentDateStart)
+          // .where('deliveryDate', isLessThan: currentDateEnd)
+          .where('Status', isEqualTo: orderStatus)
+          .where('location', isEqualTo: location)
+          .where('orderType', isEqualTo: orderType)
+          .get();
+      final totalOrders = querySnapshot.size;
+
+      final ordersList = querySnapshot.docs.map((documentSnapshot) {
+        final data = documentSnapshot.data() as Map<String, dynamic>;
+        return {
+          'orderRef': documentSnapshot.reference.id,
+          'orderName': data['orderName'],
+          'quantity': data['numberOfItems'],
+          'orderType': data['orderType'],
+          'orderStatus': data['Status'],
+          'orderLocation': data['location'],
+        };
+      }).toList();
+
+      return {
+        'totalOrders': totalOrders,
+        'ordersList': ordersList,
+      };
+    } catch (e) {
+      print("Error fetching order count references: $e");
+      return {
+        'totalOrders': 0,
+        'ordersList': [],
+      };
+    }
+  }
+
+  Future<void> updateOrderStatus(String orderId, String newStatus) async {
     try {
       final orderDocRef = ordersCollection.doc(orderId);
 
@@ -173,7 +107,7 @@ Future<List<Map<String, dynamic>>> fetchOrderByPackedStatus(
     }
   }
 
-Future<Map<String, dynamic>> fetchTimeForScanning() async {
+  Future<Map<String, dynamic>> fetchTimeForScanning() async {
     final timeDocs = await timeCollection.get();
 
     final Map<String, dynamic> timeSlots = {};
@@ -197,7 +131,8 @@ Future<Map<String, dynamic>> fetchTimeForScanning() async {
     return timeSlots;
   }
 
-   Future<List<Map<String, dynamic>>> fetchOrderReferencesByPid(pid, String profileType) async {
+  Future<List<Map<String, dynamic>>> fetchOrderReferencesByPid(
+      pid, String profileType) async {
     try {
       List<Map<String, dynamic>> ordersList = [];
       CollectionReference ordersCollection =
@@ -257,7 +192,7 @@ Future<Map<String, dynamic>> fetchTimeForScanning() async {
     }
   }
 
-   Future<List<Map<String, dynamic>>> fetchOrders(
+  Future<List<Map<String, dynamic>>> fetchOrders(
       CollectionReference ordersCollection,
       String pid,
       DateTime currentDate,
@@ -297,15 +232,17 @@ Future<Map<String, dynamic>> fetchTimeForScanning() async {
     return ordersList;
   }
 
-Future<String?> getDeliveryPartnerId(String userEmail) async {
+  Future<String?> getDeliveryPartnerId(String userEmail) async {
     try {
       QuerySnapshot querySnapshot = await deliveryPartners
-          .where('partner_email', isEqualTo: userEmail).get();
+          .where('partner_email', isEqualTo: userEmail)
+          .get();
 
       if (querySnapshot.docs.isNotEmpty) {
         // Assuming that userEmail is unique and only one document will match
         DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
-        return documentSnapshot.id;  // Return the document id
+        print(documentSnapshot.id);
+        return documentSnapshot.id; // Return the document id
       } else {
         print('No matching deliveryId found');
         return null;
@@ -316,18 +253,119 @@ Future<String?> getDeliveryPartnerId(String userEmail) async {
     }
   }
 
-  Future<List<dynamic>?> getDeliveryLocationsForPartnerId(String deliveryPartnerId) async {
+  Future<List<dynamic>?> getDeliveryLocationsForPartnerId(
+      String deliveryPartnerId) async {
     try {
       DocumentReference docRef = deliveryPartners.doc(deliveryPartnerId);
-       DocumentSnapshot docSnapshot = await docRef.get();
-       List<dynamic> locationsForDeliveryPartner = List<dynamic>.from(docSnapshot['partner_locationID'] ?? []);
-    return locationsForDeliveryPartner;
+      DocumentSnapshot docSnapshot = await docRef.get();
+      List<dynamic> locationsForDeliveryPartner =
+          List<dynamic>.from(docSnapshot['partner_locationID'] ?? []);
+      return locationsForDeliveryPartner;
     } catch (e) {
       print('Error: $e');
       return null;
     }
   }
 
-  
+  Future<List<String>> fetchLocationNamesByLocationIds(
+      List<DocumentReference<Map<String, dynamic>>>? locations) async {
+    List<String> locationNames = [];
 
+    try {
+      for (DocumentReference<Map<String, dynamic>> locationRef
+          in locations ?? []) {
+        // Check if the location is in the officeLocation collection
+        DocumentSnapshot<Map<String, dynamic>> officeDoc =
+            await locationRef.get();
+        if (officeDoc.exists) {
+          locationNames.add("Office: ${officeDoc.data()!['name']}");
+        } else {
+          // Check if the location is in the schoolLocation collection
+          DocumentSnapshot<Map<String, dynamic>> schoolDoc =
+              await locationRef.get();
+          if (schoolDoc.exists) {
+            locationNames.add("School: ${schoolDoc.data()!['name']}");
+          }
+        }
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+
+    return locationNames;
+  }
 }
+
+      // if (DateTime.parse(currentTime)
+      //         .isAfter(DateTime.parse(timeSlots['breakfast']['startTime'])) &&
+      //     DateTime.parse(currentTime)
+      //         .isBefore(DateTime.parse(timeSlots['breakfast']['endTime']))) {
+      //   print('Current Time: ${DateTime.parse(currentTime)}');
+      //   if (profileType == "Child") {
+      //     QuerySnapshot querySnapshot = await ordersCollection
+      //         .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
+      //         .where('deliveryDate', isLessThan: nextDate)
+      //         .where('orderType', whereIn: ['breakfast', 'lunch'])
+      //         .where('location')
+      //         .where('profileType', isEqualTo: profileType)
+      //         .get();
+
+      //     querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
+      //       // Get the reference of each document
+      //       DocumentReference documentReference = documentSnapshot.reference;
+      //       print('Document Path: ${documentReference.path}');
+      //       // get the count of the documents
+      //       totalOrders = querySnapshot.docs.length;
+      //     });
+      //   } else if (profileType == "Adult") {
+      //     QuerySnapshot querySnapshot = await ordersCollection
+      //         .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
+      //         .where('deliveryDate', isLessThan: nextDate)
+      //         .where('orderType', isEqualTo: 'breakfast')
+      //         .where('profileType', isEqualTo: profileType)
+      //         .get();
+      //     querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
+      //       // Get the reference of each document
+      //       DocumentReference documentReference = documentSnapshot.reference;
+      //       print('Document Path: ${documentReference.path}');
+      //       // get the count of the documents
+      //       totalOrders = querySnapshot.docs.length;
+      //     });
+      //   }
+      // } else if (DateTime.parse(currentTime)
+      //         .isAfter(DateTime.parse(timeSlots['lunch']['startTime'])) &&
+      //     DateTime.parse(currentTime)
+      //         .isBefore(DateTime.parse(timeSlots['lunch']['endTime']))) {
+      //   QuerySnapshot querySnapshot = await ordersCollection
+      //       .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
+      //       .where('deliveryDate', isLessThan: nextDate)
+      //       .where('orderType', isEqualTo: 'lunch')
+      //       .where('profileType', isEqualTo: 'Adult')
+      //       .get();
+
+      //   querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
+      //     // Get the reference of each document
+      //     DocumentReference documentReference = documentSnapshot.reference;
+      //     print('Document Path: ${documentReference.path}');
+      //     // get the count of the documents
+      //     totalOrders = querySnapshot.docs.length;
+      //   });
+      // } else if (DateTime.parse(currentTime)
+      //         .isAfter(DateTime.parse(timeSlots['dinner']['startTime'])) &&
+      //     DateTime.parse(currentTime)
+      //         .isBefore(DateTime.parse(timeSlots['dinner']['endTime']))) {
+      //   QuerySnapshot querySnapshot = await ordersCollection
+      //       .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
+      //       .where('deliveryDate', isLessThan: nextDate)
+      //       .where('orderType', isEqualTo: 'dinner')
+      //       .where('profileType', isEqualTo: 'Adult')
+      //       .get();
+
+      //   querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
+      //     // Get the reference of each document
+      //     DocumentReference documentReference = documentSnapshot.reference;
+      //     print('Document Path: ${documentReference.path}');
+      //     // get the count of the documents
+      //     totalOrders = querySnapshot.docs.length;
+      //   });
+      // }
