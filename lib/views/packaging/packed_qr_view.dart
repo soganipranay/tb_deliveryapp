@@ -98,8 +98,8 @@ class _PackedQRViewState extends State<PackedQRView> {
                       result = null;
                       for (var orderItem in scannedOrderDetails) {
                         if (orderItem['orderStatus'] == 'Pending') {
-                          await firebaseService.updateOrderStatus(orderItem['orderRef'], 'Order Packed');
-                          print("Order Packed: ${orderItem['orderRef']}");
+                          await firebaseService.updateOrderStatus(orderItem['orderRef'], 'Packed');
+                          print("Packed: ${orderItem['orderRef']}");
                         } else {
                           showDialog(
                             context: context,

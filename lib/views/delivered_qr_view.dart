@@ -108,12 +108,12 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                       await controller?.pauseCamera();
                       result = null;
                       for (var orderItem in scannedOrderDetails) {
-                        if (orderItem['orderStatus'] == 'Order Packed') {
+                        if (orderItem['orderStatus'] == 'Packed') {
                           await firebaseService.updateOrderStatus(
-                              orderItem['orderRef'], 'Order Delivered');
-                          print("Order Delivered: ${orderItem['orderRef']}");
+                              orderItem['orderRef'], 'Delivered');
+                          print("Delivered: ${orderItem['orderRef']}");
                         } else if (orderItem['orderStatus'] ==
-                            'Order Delivered') {
+                            'Delivered') {
                           // Dissable the ElevatedButton
                           print('Order already Delivered');
                         } else {

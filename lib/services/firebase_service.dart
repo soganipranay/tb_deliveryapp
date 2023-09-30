@@ -13,8 +13,11 @@ class FirebaseService {
   final CollectionReference schoolLocation =
       FirebaseFirestore.instance.collection('School');
 
-  Future<int> fetchTotalOrders(List<String>? locations, String orderType) async {
+  Future<int> fetchTotalOrders(
+      String locations, String orderType) async {
     try {
+        final CollectionReference ordersCollection =
+          FirebaseFirestore.instance.collection('Orders');
       DateTime currentDate = DateTime.now();
       int year = currentDate.year; // Year component
       int month = currentDate.month; // Month component (1 to 12)
@@ -32,7 +35,7 @@ class FirebaseService {
           .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
           .where('deliveryDate', isLessThan: nextDate)
           .where('orderType', isEqualTo: orderType)
-          .where('location', whereIn: [locations]).get();
+          .where('location', isEqualTo: locations).get();
 
       querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
         // Get the reference of each document
@@ -41,7 +44,6 @@ class FirebaseService {
         // get the count of the documents
         totalOrders = querySnapshot.docs.length;
         print('Total Orders: $totalOrders');
-
       });
 
       return totalOrders;
@@ -72,7 +74,7 @@ class FirebaseService {
       final totalOrders = querySnapshot.size;
 
       final ordersList = querySnapshot.docs.map((documentSnapshot) {
-        final data = documentSnapshot.data() as Map<String, dynamic>;
+        final data = documentSnapshot.data();
         return {
           'orderRef': documentSnapshot.reference.id,
           'orderName': data['orderName'],
@@ -82,7 +84,7 @@ class FirebaseService {
           'orderLocation': data['location'],
         };
       }).toList();
-
+      print(ordersList);
       return {
         'totalOrders': totalOrders,
         'ordersList': ordersList,

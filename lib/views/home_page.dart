@@ -59,7 +59,7 @@ class _HomeViewState extends State<HomeView> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => ProcessView(
-                      meal: "breakfast",
+                      meal: "Breakfast",
                       locations: deliveryPartnerLocations,
                     ),
                   ),
@@ -73,7 +73,7 @@ class _HomeViewState extends State<HomeView> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => ProcessView(
-                      meal: "lunch",
+                      meal: "Lunch",
                       locations: deliveryPartnerLocations,
                     ),
                   ),
@@ -87,7 +87,7 @@ class _HomeViewState extends State<HomeView> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => ProcessView(
-                      meal: "dinner",
+                      meal: "Dinner",
                       locations: deliveryPartnerLocations,
                     ),
                   ),
