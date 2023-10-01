@@ -82,6 +82,7 @@ class FirebaseService {
           'orderType': data['orderType'],
           'orderStatus': data['Status'],
           'orderLocation': data['location'],
+          'pid': data['pid'],
         };
       }).toList();
       print(ordersList);
@@ -106,6 +107,35 @@ class FirebaseService {
       print('Order status updated to: $newStatus');
     } catch (e) {
       print('Error updating order status: $e');
+    }
+  }
+
+  Future<void> updateOrdersInFirestore(
+      List<Map<String, dynamic>> ordersToUpdate) async {
+    final firestore = FirebaseFirestore.instance;
+
+    // Create a batch to perform multiple updates in a single transaction
+    WriteBatch batch = firestore.batch();
+
+    for (var orderDetails in ordersToUpdate) {
+      String orderRef = orderDetails['orderRef'];
+      String newStatus = orderDetails['orderStatus'];
+
+      // Reference to the order document in Firestore
+      DocumentReference orderDocRef =
+          firestore.collection('orders').doc(orderRef);
+
+      // Update the order status
+      batch.update(orderDocRef, {'orderStatus': newStatus});
+    }
+
+    try {
+      // Commit the batch to update all orders in a single transaction
+      await batch.commit();
+      print('Orders updated in Firestore successfully');
+    } catch (e) {
+      print('Error updating orders in Firestore: $e');
+      // Handle the error as needed
     }
   }
 

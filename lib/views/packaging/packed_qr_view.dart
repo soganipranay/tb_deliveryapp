@@ -6,6 +6,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tb_deliveryapp/services/firebase_service.dart';
 
 class PackedQRView extends StatefulWidget {
+  final List<Map<String, dynamic>> pendingOrdersList; // Add this field
+
+  PackedQRView({Key? key, required this.pendingOrdersList}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => _PackedQRViewState();
 }
@@ -17,15 +21,79 @@ class _PackedQRViewState extends State<PackedQRView> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   late List<Map<String, dynamic>> scannedOrderDetails = [];
   late String profileType;
+  bool allOrdersPacked = false;
+
+  void _onQRViewCreated(QRViewController controller) {
+    setState(() {
+      this.controller = controller;
+    });
+    controller.scannedDataStream.listen((scanData) async {
+      setState(() {
+        result = scanData;
+      });
+
+      // Check if the scanned QR code exists in the pendingOrdersList
+      bool found = false;
+      Map<String, dynamic>? orderDetails;
+      print(widget.pendingOrdersList);
+      for (var orderItem in widget.pendingOrdersList) {
+        if (orderItem['pid'] == result!.code.toString()) {
+          found = true;
+          orderDetails = orderItem;
+          break;
+        }
+      }
+
+      if (found) {
+        // Handle the case when the QR code is found in pendingOrdersList
+        print("QR Code found in pendingOrdersList: ${result!.code.toString()}");
+        setState(() {
+          scannedOrderDetails.clear();
+          scannedOrderDetails.add(orderDetails!);
+        });
+
+        // Check if all orders are packed and the pending order list is empty
+        bool allPacked = true;
+        for (var orderItem in scannedOrderDetails) {
+          if (orderItem['orderStatus'] != 'Packed') {
+            allPacked = false;
+            break;
+          }
+        }
+        if (allPacked && widget.pendingOrdersList.isEmpty) {
+          // Prepare a list of orders to update in Firestore
+          List<Map<String, dynamic>> ordersToUpdate = [];
+          for (var orderItem in scannedOrderDetails) {
+            if (orderItem['orderStatus'] == 'Packed') {
+              ordersToUpdate.add({
+                'orderRef': orderItem['orderRef'],
+                'orderStatus': 'Packed',
+              });
+            }
+          }
+
+          // Update the Firestore collection with packed orders
+          await firebaseService.updateOrdersInFirestore(ordersToUpdate);
+          print("Orders updated in Firestore");
+        }
+      } else {
+        // Handle the case when the QR code is not found in pendingOrdersList
+        print(
+            "QR Code not found in pendingOrdersList: ${result!.code.toString()}");
+        setState(() {
+          scannedOrderDetails.clear();
+        });
+        // You can show an error message or perform other actions as needed.
+      }
+    });
+  }
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
   @override
   void reassemble() {
     super.reassemble();
-    if (Platform.isAndroid) {
-      controller!.pauseCamera();
-    }
+    if (Platform.isAndroid) {}
     controller!.resumeCamera();
   }
 
@@ -43,7 +111,7 @@ class _PackedQRViewState extends State<PackedQRView> {
           ),
         ),
       ),
-      body:  Column(
+      body: Column(
         children: <Widget>[
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.4,
@@ -53,38 +121,30 @@ class _PackedQRViewState extends State<PackedQRView> {
             height: 16,
           ),
           Expanded(
-            child: result != null
-                ? FutureBuilder<List<Map<String, dynamic>>>(
-                    future: firebaseService.fetchOrderReferencesByPid(result!.code.toString(), profileType),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const CircularProgressIndicator(
-                          color: Colors.orange,
-                        );
-                      } else if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
-                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Text('No orders found.');
-                      } else {
-                        scannedOrderDetails = snapshot.data!;
-                        return ListView.builder(
-                          itemCount: scannedOrderDetails.length,
-                          itemBuilder: (context, index) {
-                            final orderItem = scannedOrderDetails[index];
-                            return ListTile(
-                              title: Text("Order Name: ${orderItem['orderName']}"),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("Quantity: ${orderItem['quantity']}"),
-                                  Text("Order Type: ${orderItem['orderType']}"),
-                                  const Divider(),
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                      }
+            child: scannedOrderDetails.isNotEmpty
+                ? ListView.builder(
+                    itemCount: scannedOrderDetails.length,
+                    itemBuilder: (context, index) {
+                      final orderItem = scannedOrderDetails[index];
+                      bool isPacked = orderItem['orderStatus'] == 'Packed';
+
+                      return ListTile(
+                        title: Text("Order Name: ${orderItem['orderName']}"),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Quantity: ${orderItem['quantity']}"),
+                            Text("Order Type: ${orderItem['orderType']}"),
+                            const Divider(),
+                          ],
+                        ),
+                        trailing: isPacked
+                            ? Icon(
+                                Icons.circle,
+                                color: Colors.green,
+                              )
+                            : null, // Display green dot if packed, null otherwise
+                      );
                     },
                   )
                 : const Text('Scan a code'),
@@ -98,7 +158,10 @@ class _PackedQRViewState extends State<PackedQRView> {
                       result = null;
                       for (var orderItem in scannedOrderDetails) {
                         if (orderItem['orderStatus'] == 'Pending') {
-                          await firebaseService.updateOrderStatus(orderItem['orderRef'], 'Packed');
+                          await firebaseService.updateOrderStatus(
+                              orderItem['orderRef'], 'Packed');
+                          // Update the order status in the local list
+                          orderItem['orderStatus'] = 'Packed';
                           print("Packed: ${orderItem['orderRef']}");
                         } else {
                           showDialog(
@@ -109,7 +172,8 @@ class _PackedQRViewState extends State<PackedQRView> {
                                 content: Text(orderItem['orderRef']),
                                 actions: <Widget>[
                                   ElevatedButton(
-                                    onPressed: () => Navigator.of(context).pop(),
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.orange,
                                     ),
@@ -122,16 +186,20 @@ class _PackedQRViewState extends State<PackedQRView> {
                         }
                       }
                       await controller?.resumeCamera();
+                      setState(
+                          () {}); // Refresh the UI to reflect the updated status
                     }
                   : () {},
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 minimumSize: const Size(100, 40),
                 textStyle: const TextStyle(fontSize: 14),
               ),
               child: const Text('Packed', style: TextStyle(fontSize: 10)),
             ),
-          ),
+          ), 
+    
         ],
       ),
     );
@@ -157,18 +225,6 @@ class _PackedQRViewState extends State<PackedQRView> {
     );
   }
 
-  void _onQRViewCreated(QRViewController controller) {
-    setState(() {
-      this.controller = controller;
-    });
-    controller.scannedDataStream.listen((scanData) async {
-      setState(() {
-        result = scanData;
-      });
-      print(result!.code.toString());
-    });
-  }
-
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
     log('${DateTime.now().toIso8601String()}_onPermissionSet $p');
     if (!p) {
@@ -177,8 +233,6 @@ class _PackedQRViewState extends State<PackedQRView> {
       );
     }
   }
-
-
 
   @override
   void dispose() {
