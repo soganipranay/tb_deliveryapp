@@ -71,7 +71,6 @@ class _PackedQRViewState extends State<PackedQRView> {
               });
             }
           }
-
           // Update the Firestore collection with packed orders
           await firebaseService.updateOrdersInFirestore(ordersToUpdate);
           print("Orders updated in Firestore");
@@ -198,8 +197,7 @@ class _PackedQRViewState extends State<PackedQRView> {
               ),
               child: const Text('Packed', style: TextStyle(fontSize: 10)),
             ),
-          ), 
-    
+          ),
         ],
       ),
     );

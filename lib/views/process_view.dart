@@ -1,9 +1,11 @@
 import 'dart:ffi';
-import 'delivered_qr_view.dart';
 import 'package:flutter/material.dart';
+import 'delivering/delivered_qr_view.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tb_deliveryapp/services/firebase_service.dart';
 import 'package:tb_deliveryapp/views/packaging/count_packed.dart';
+import 'package:tb_deliveryapp/views/delivering/count_delivered.dart';
+
 
 class ProcessView extends StatefulWidget {
   const ProcessView({Key? key, required this.meal, required this.locations})
@@ -76,7 +78,9 @@ class _ProcessViewState extends State<ProcessView> {
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            DeliveredQRView(meal: widget.meal)));
+                            CountDeliveredOrders(
+                            meal: widget.meal,
+                            locationNames: deliveryPartnerLocationName)));
               },
               child: const Text('Delivery'),
             ),
@@ -86,7 +90,9 @@ class _ProcessViewState extends State<ProcessView> {
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            DeliveredQRView(meal: widget.meal)));
+                            CountDeliveredOrders(
+                            meal: widget.meal,
+                            locationNames: deliveryPartnerLocationName)));
               },
               child: const Text('Representative'),
             ),
@@ -96,7 +102,9 @@ class _ProcessViewState extends State<ProcessView> {
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            DeliveredQRView(meal: widget.meal)));
+                            CountDeliveredOrders(
+                            meal: widget.meal,
+                            locationNames: deliveryPartnerLocationName)));
               },
               child: const Text('Picked'),
             ),

@@ -23,10 +23,9 @@ class AuthManager {
           await firebaseService.getDeliveryPartnerId(email);
 
       if (deliveryPartnerId != null) {
-        print("deliveryPartner: $deliveryPartnerId");
+        await saveUserLoggedIn(true);
         Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) =>
-              HomeView(isLoggedIn: true, partnerId: deliveryPartnerId),
+          builder: (context) => HomeView(isLoggedIn: true, partnerId: deliveryPartnerId),
         ));
       } else {
         message = 'No delivery partner found for that email.';

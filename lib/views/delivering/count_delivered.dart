@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:tb_deliveryapp/services/firebase_service.dart';
 import 'package:tb_deliveryapp/views/packaging/packed_qr_view.dart';
+import 'package:tb_deliveryapp/views/delivering/delivered_qr_view.dart';
 
-class CountPackedOrders extends StatefulWidget {
+class CountDeliveredOrders extends StatefulWidget {
   final String meal;
   final List<String>? locationNames;
 
-  CountPackedOrders({Key? key, required this.meal, required this.locationNames})
+  CountDeliveredOrders({Key? key, required this.meal, required this.locationNames})
       : super(key: key);
 
   @override
-  State<CountPackedOrders> createState() => _CountPackedOrdersState();
+  State<CountDeliveredOrders> createState() => _CountDeliveredOrdersState();
 }
 
-class _CountPackedOrdersState extends State<CountPackedOrders> {
+class _CountDeliveredOrdersState extends State<CountDeliveredOrders> {
   final FirebaseService firebaseService = FirebaseService();
-  int totalPackedOrders = 0;
+  int totalDeliveredOrders = 0;
   late String profileType = "";
+  Map<String, int> locationDeliveredOrders = {};
   Map<String, int> locationPackedOrders = {};
-  Map<String, int> locationPendingOrders = {};
 
   late int totalOrders = 0;
+  List<Map<String, dynamic>> deliveredOrdersList = [];
   List<Map<String, dynamic>> packedOrdersList = [];
-  List<Map<String, dynamic>> pendingOrdersList = [];
 
   List<String>? locationNames; // Declare the variable
 
@@ -31,8 +32,8 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
     super.initState();
     locationNames =
         widget.locationNames; // Initialize it with widget.locationNames
-    countPackedOrders(); // Call the function to fetch the data
-    print("packedOrdersList $packedOrdersList");
+    countDeliveredOrders(); // Call the function to fetch the data
+    print("deliveredOrdersList $deliveredOrdersList");
     // firebaseService.fetchTotalOrders("AU Bank", widget.meal).then((value) {
     //   if (mounted) {
     //     setState(() {
@@ -49,7 +50,7 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Packaging for ${widget.meal}'),
+        title: Text('Delivering for ${widget.meal}'),
         leading: Padding(
           padding: const EdgeInsets.all(6.0),
           child: Image.asset(
@@ -62,15 +63,15 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
       body: SingleChildScrollView(
         child: Column(
           children: locationNames?.map((locationName) {
-                final int pendingOrders =
-                    locationPendingOrders[locationName] ?? 0;
                 final int packedOrders =
                     locationPackedOrders[locationName] ?? 0;
+                final int deliveredOrders =
+                    locationDeliveredOrders[locationName] ?? 0;
 
                 return ListTile(
                   title: Text(locationName),
                   subtitle: Text(
-                    "Pending: $pendingOrders, Packed: $packedOrders",
+                    "Packed: $packedOrders, Delivered: $deliveredOrders",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.green,
@@ -79,8 +80,8 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
                   tileColor: Colors.blue.withOpacity(0.1),
                   onTap: () {
                     Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (context) => PackedQRView(
-                              pendingOrdersList: pendingOrdersList,
+                        builder: (context) => DeliveredQRView(
+                              packedOrdersList: packedOrdersList,
                             ))); // Pass locationNames
                     // Handle tap event if needed
                   },
@@ -92,8 +93,15 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
     );
   }
 
-  Future<void> countPackedOrders() async {
+  Future<void> countDeliveredOrders() async {
     for (String location in widget.locationNames ?? []) {
+      // Fetch the total delivered orders for the current location
+      final Map<String, dynamic> deliveredOrders = await firebaseService
+          .fetchOrderByOrderStatus('Delivered', location, widget.meal);
+      final int totalDeliveredOrders = deliveredOrders['totalOrders'];
+      final List<Map<String, dynamic>> deliveredOrdersData = deliveredOrders[
+          'ordersList']; // Use a different variable name to avoid conflict
+
       // Fetch the total packed orders for the current location
       final Map<String, dynamic> packedOrders = await firebaseService
           .fetchOrderByOrderStatus('Packed', location, widget.meal);
@@ -101,27 +109,20 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
       final List<Map<String, dynamic>> packedOrdersData = packedOrders[
           'ordersList']; // Use a different variable name to avoid conflict
 
-      // Fetch the total pending orders for the current location
-      final Map<String, dynamic> pendingOrders = await firebaseService
-          .fetchOrderByOrderStatus('Pending', location, widget.meal);
-      final int totalPendingOrders = pendingOrders['totalOrders'];
-      final List<Map<String, dynamic>> pendingOrdersData = pendingOrders[
-          'ordersList']; // Use a different variable name to avoid conflict
-
-      // Update the locationPackedOrders and locationPendingOrders maps
+      // Update the locationdeliveredOrders and locationPackedOrders maps
       setState(() {
+        locationDeliveredOrders[location] = totalDeliveredOrders;
         locationPackedOrders[location] = totalPackedOrders;
-        locationPendingOrders[location] = totalPendingOrders;
 
         // Update the lists
+        deliveredOrdersList.addAll(deliveredOrdersData);
         packedOrdersList.addAll(packedOrdersData);
-        pendingOrdersList.addAll(pendingOrdersData);
 
+        print(" deliveredOrdersList $deliveredOrdersList");
         print(" packedOrdersList $packedOrdersList");
-        print(" pendingOrdersList $pendingOrdersList");
 
+        print("locationDeliveredOrders ${locationDeliveredOrders[location]}");
         print("locationPackedOrders ${locationPackedOrders[location]}");
-        print("locationPendingOrders ${locationPendingOrders[location]}");
       });
     }
   }

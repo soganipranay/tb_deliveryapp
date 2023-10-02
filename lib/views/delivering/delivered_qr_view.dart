@@ -1,14 +1,14 @@
 import 'dart:io';
 import 'dart:developer';
-import '../services/auth_manager.dart';
 import 'package:flutter/material.dart';
+import '../../services/auth_manager.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tb_deliveryapp/services/firebase_service.dart';
 
 class DeliveredQRView extends StatefulWidget {
-  final String meal;
-  const DeliveredQRView({Key? key, required this.meal}) : super(key: key);
+  final List<Map<String, dynamic>> packedOrdersList;
+  const DeliveredQRView({Key? key, required this.packedOrdersList}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _DeliveredQRViewState();
