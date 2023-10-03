@@ -6,7 +6,6 @@ import 'package:tb_deliveryapp/services/firebase_service.dart';
 import 'package:tb_deliveryapp/views/packaging/count_packed.dart';
 import 'package:tb_deliveryapp/views/delivering/count_delivered.dart';
 
-
 class ProcessView extends StatefulWidget {
   const ProcessView({Key? key, required this.meal, required this.locations})
       : super(key: key);
@@ -26,16 +25,15 @@ class _ProcessViewState extends State<ProcessView> {
 
   Future<void> initializeData() async {
     FirebaseService firebaseService = FirebaseService();
-
-    List<String>? locationName = await firebaseService
-        .fetchLocationNamesByLocationIds(widget.locations?.cast<
-            DocumentReference<Map<String, dynamic>>>()); // Use widget.locations
-
+    print("process view ${widget.locations}");
+    List<String>? locationName =
+        await firebaseService.fetchLocationNamesByLocationIds(widget.locations);
+    print("Process View locationNames: $locationName");
     if (locationName != null) {
-      List<String> filteredLocationNames =
-          locationName.map((name) => name.replaceAll('Office: ', '')).toList();
+      // List<String> filteredLocationNames =
+      //     locationName.map((name) => name.replaceAll('Office: ', '')).toList();
       setState(() {
-        deliveryPartnerLocationName = filteredLocationNames;
+        deliveryPartnerLocationName = locationName;
         print("deliveryPartnerLocationsNames $deliveryPartnerLocationName");
       });
     }
@@ -77,8 +75,7 @@ class _ProcessViewState extends State<ProcessView> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>
-                            CountDeliveredOrders(
+                        builder: (context) => CountDeliveredOrders(
                             meal: widget.meal,
                             locationNames: deliveryPartnerLocationName)));
               },
@@ -89,8 +86,7 @@ class _ProcessViewState extends State<ProcessView> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>
-                            CountDeliveredOrders(
+                        builder: (context) => CountDeliveredOrders(
                             meal: widget.meal,
                             locationNames: deliveryPartnerLocationName)));
               },
@@ -101,8 +97,7 @@ class _ProcessViewState extends State<ProcessView> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>
-                            CountDeliveredOrders(
+                        builder: (context) => CountDeliveredOrders(
                             meal: widget.meal,
                             locationNames: deliveryPartnerLocationName)));
               },

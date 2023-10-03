@@ -1,5 +1,5 @@
-import '../views/login_page.dart';
 import 'package:flutter/material.dart';
+import '../views/loginAuth/login_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tb_deliveryapp/views/home_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,15 +20,27 @@ class AuthManager {
 
       // Retrieve the delivery partner ID based on the logged-in user's email
       String? deliveryPartnerId =
-          await firebaseService.getDeliveryPartnerId(email);
+          await firebaseService.getDeliveryPartnerId(email, context);
+      String? representativeId =
+          await firebaseService.getRepresentativeId(email, context);
 
       if (deliveryPartnerId != null) {
+
         await saveUserLoggedIn(true);
         Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => HomeView(isLoggedIn: true, partnerId: deliveryPartnerId),
+          builder: (context) =>
+              HomeView(isLoggedIn: true, partnerId: deliveryPartnerId),
+        ));
+      } else if (representativeId != null) {
+        await saveUserLoggedIn(true);
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) =>
+              HomeView(isLoggedIn: true, partnerId: representativeId),
         ));
       } else {
-        message = 'No delivery partner found for that email.';
+        // No partner found for that email
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('No partner found for that email.')));
       }
     } on FirebaseAuthException catch (e) {
       // Handle Firebase Authentication errors (e.g., user-not-found, wrong-password)
@@ -44,7 +56,6 @@ class AuthManager {
           .showSnackBar(SnackBar(content: Text(message)));
     }
   }
-
 
 // Function to store user login state
   Future<void> saveUserLoggedIn(bool isLoggedIn) async {

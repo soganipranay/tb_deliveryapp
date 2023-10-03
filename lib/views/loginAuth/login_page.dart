@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../services/auth_manager.dart'; 
+import '../../services/auth_manager.dart';
 import 'package:tb_deliveryapp/widgets/bgWidget.dart';
-
+import 'package:tb_deliveryapp/views/loginAuth/signUp.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -9,8 +9,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
-final AuthManager _authManager = AuthManager();
+  final AuthManager _authManager = AuthManager();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -19,8 +18,8 @@ final AuthManager _authManager = AuthManager();
     final String password = _passwordController.text.trim();
     _authManager.signInWithEmailAndPassword(email, password, context);
   }
- 
   
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,10 +34,9 @@ final AuthManager _authManager = AuthManager();
             ),
           ),
         ),
-        body: Stack(
-          children: [
-            const BackgroundWidget(),
-            Center(
+        body: Stack(children: [
+          const BackgroundWidget(),
+          Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
@@ -97,15 +95,23 @@ final AuthManager _authManager = AuthManager();
                       ),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (context) => SignUpPage()
+                        ));
+                      },
+                      child: new Text("Create a new Account"),
+                    ),
+                  ),
                 ],
               ),
             ),
           )
-        ]
-  )
-  );
+        ]));
   }
-  
 }
   
   

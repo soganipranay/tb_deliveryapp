@@ -23,15 +23,13 @@ class _HomeViewState extends State<HomeView> {
 
   Future<void> initializeData() async {
     FirebaseService firebaseService = FirebaseService();
-        print("deliveryPartnerLocations $deliveryPartnerLocations");
-
     List<dynamic>? locations = await firebaseService
-        .getDeliveryLocationsForPartnerId(widget.partnerId);
+        .getLocationsForPartnerId(widget.partnerId);
 
     if (locations != null) {
       setState(() {
         deliveryPartnerLocations = locations;
-        print("deliveryPartnerLocations $deliveryPartnerLocations");
+        print("Home deliveryPartnerLocations $deliveryPartnerLocations");
       });
     }
   }

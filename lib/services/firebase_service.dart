@@ -1,4 +1,4 @@
-import 'package:tb_deliveryapp/utils/utils.dart';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirebaseService {
@@ -6,17 +6,17 @@ class FirebaseService {
       FirebaseFirestore.instance.collection('Orders');
   final CollectionReference timeCollection =
       FirebaseFirestore.instance.collection('Time');
-  final CollectionReference deliveryPartners =
-      FirebaseFirestore.instance.collection('DeliveryPartners');
-  final CollectionReference officeLocation =
+  final CollectionReference userPartners =
+      FirebaseFirestore.instance.collection('Users');
+  final CollectionReference<Map<String, dynamic>> officeLocation =
       FirebaseFirestore.instance.collection('Office');
-  final CollectionReference schoolLocation =
+
+  final CollectionReference<Map<String, dynamic>> schoolLocation =
       FirebaseFirestore.instance.collection('School');
 
-  Future<int> fetchTotalOrders(
-      String locations, String orderType) async {
+  Future<int> fetchTotalOrders(String locations, String orderType) async {
     try {
-        final CollectionReference ordersCollection =
+      final CollectionReference ordersCollection =
           FirebaseFirestore.instance.collection('Orders');
       DateTime currentDate = DateTime.now();
       int year = currentDate.year; // Year component
@@ -35,7 +35,8 @@ class FirebaseService {
           .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
           .where('deliveryDate', isLessThan: nextDate)
           .where('orderType', isEqualTo: orderType)
-          .where('location', isEqualTo: locations).get();
+          .where('location', isEqualTo: locations)
+          .get();
 
       querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
         // Get the reference of each document
@@ -65,8 +66,8 @@ class FirebaseService {
       final currentDateEnd = currentDateStart.add(Duration(days: 1));
 
       final querySnapshot = await ordersCollection
-          // .where('deliveryDate', isGreaterThanOrEqualTo: currentDateStart)
-          // .where('deliveryDate', isLessThan: currentDateEnd)
+          .where('deliveryDate', isGreaterThanOrEqualTo: currentDateStart)
+          .where('deliveryDate', isLessThan: currentDateEnd)
           .where('Status', isEqualTo: orderStatus)
           .where('location', isEqualTo: location)
           .where('orderType', isEqualTo: orderType)
@@ -163,118 +164,41 @@ class FirebaseService {
     return timeSlots;
   }
 
-  Future<List<Map<String, dynamic>>> fetchOrderReferencesByPid(
-      pid, String profileType) async {
+  Future<String?> getDeliveryPartnerId(
+      String userEmail, BuildContext context) async {
     try {
-      List<Map<String, dynamic>> ordersList = [];
-      CollectionReference ordersCollection =
-          FirebaseFirestore.instance.collection('Orders');
-
-      DateTime currentDate = DateTime.now();
-      DateTime nextDate = currentDate.add(const Duration(days: 1));
-      print('Current Date: $currentDate');
-      print('Next Date: $nextDate');
-
-      Map<String, dynamic> timeSlots = await fetchTimeForScanning();
-      String currentTime = Utils.getCurrentTime();
-
-      if (DateTime.now().hour >=
-              int.parse(timeSlots['breakfast']['startTime'].split(':')[0]) &&
-          DateTime.now().minute >=
-              int.parse(timeSlots['breakfast']['startTime'].split(':')[1]) &&
-          DateTime.now().hour <
-              int.parse(timeSlots['breakfast']['endTime'].split(':')[0]) &&
-          DateTime.now().minute <
-              int.parse(timeSlots['breakfast']['endTime'].split(':')[1])) {
-        if (profileType == "Child") {
-          ordersList.addAll(await fetchOrders(ordersCollection, pid,
-              currentDate, nextDate, ['breakfast', 'lunch'], profileType));
-        }
-      } else if (profileType == "Adult") {
-        ordersList.addAll(await fetchOrders(ordersCollection, pid, currentDate,
-            nextDate, ['breakfast'], profileType));
-      } else if (DateTime.now().hour >=
-              int.parse(timeSlots['lunch']['startTime'].split(':')[0]) &&
-          DateTime.now().minute >=
-              int.parse(timeSlots['lunch']['startTime'].split(':')[1]) &&
-          DateTime.now().hour <
-              int.parse(timeSlots['lunch']['endTime'].split(':')[0]) &&
-          DateTime.now().minute <
-              int.parse(timeSlots['lunch']['endTime'].split(':')[1])) {
-        ordersList.addAll(await fetchOrders(
-            ordersCollection, pid, currentDate, nextDate, ['lunch'], 'Adult'));
-      } else if (DateTime.now().hour >=
-              int.parse(timeSlots['dinner']['startTime'].split(':')[0]) &&
-          DateTime.now().minute >=
-              int.parse(timeSlots['dinner']['startTime'].split(':')[1]) &&
-          DateTime.now().hour <
-              int.parse(timeSlots['dinner']['endTime'].split(':')[0]) &&
-          DateTime.now().minute <
-              int.parse(timeSlots['dinner']['endTime'].split(':')[1])) {
-        ordersList.addAll(await fetchOrders(
-            ordersCollection, pid, currentDate, nextDate, ['dinner'], 'Adult'));
-      } else {
-        print('No orders found');
-      }
-
-      return ordersList;
-    } catch (e) {
-      print("Error fetching order references: $e");
-      return [];
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> fetchOrders(
-      CollectionReference ordersCollection,
-      String pid,
-      DateTime currentDate,
-      DateTime nextDate,
-      List<String> orderTypes,
-      String profileType) async {
-    List<Map<String, dynamic>> ordersList = [];
-    QuerySnapshot ordersQuerySnapshot = await ordersCollection
-        .where('pid', isEqualTo: pid)
-        .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
-        .where('deliveryDate', isLessThan: nextDate)
-        .where('orderType', whereIn: orderTypes)
-        .where('profileType', isEqualTo: profileType)
-        .get();
-
-    ordersQuerySnapshot.docs.forEach((documentSnapshot) {
-      DocumentReference documentReference = documentSnapshot.reference;
-      print('Document Path: ${documentReference.path}');
-      Map<String, dynamic> data =
-          documentSnapshot.data() as Map<String, dynamic>;
-
-      String orderName = data['orderName'];
-      int quantity = data['numberOfItems'];
-      String orderType = data['orderType'];
-      String orderStatus = data['Status'];
-
-      Map<String, dynamic> orderMap = {
-        'orderName': orderName,
-        'quantity': quantity,
-        'orderType': orderType,
-        'orderRef': documentSnapshot.reference.id,
-        'orderStatus': orderStatus
-      };
-      ordersList.add(orderMap);
-    });
-
-    return ordersList;
-  }
-
-  Future<String?> getDeliveryPartnerId(String userEmail) async {
-    try {
-      QuerySnapshot querySnapshot = await deliveryPartners
-          .where('partner_email', isEqualTo: userEmail)
+      QuerySnapshot querySnapshot = await userPartners
+          .where('email', isEqualTo: userEmail)
+          .where('userType', isEqualTo: "Delivery Partner")
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
         // Assuming that userEmail is unique and only one document will match
         DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
-        print(documentSnapshot.id);
-        return documentSnapshot.id; // Return the document id
+        if (documentSnapshot['adminApproved'] == "Approved") {
+          return documentSnapshot.id; // Return the document id
+        } else {
+          // Show a dialog since the user is not approved
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Awaiting Approval'),
+                content: Text(
+                    'Your account is still awaiting approval. Please contact the admin for further assistance.'),
+                actions: <Widget>[
+                  TextButton(
+                    child: Text('OK'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+          return null;
+        }
       } else {
         print('No matching deliveryId found');
         return null;
@@ -285,13 +209,59 @@ class FirebaseService {
     }
   }
 
-  Future<List<dynamic>?> getDeliveryLocationsForPartnerId(
-      String deliveryPartnerId) async {
+  Future<String?> getRepresentativeId(
+      String userEmail, BuildContext context) async {
     try {
-      DocumentReference docRef = deliveryPartners.doc(deliveryPartnerId);
+      QuerySnapshot querySnapshot = await userPartners
+          .where('email', isEqualTo: userEmail)
+          .where('userType', isEqualTo: "Representative")
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Assuming that userEmail is unique and only one document will match
+        DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
+        if (documentSnapshot['adminApproved'] == "Approved") {
+          return documentSnapshot.id; // Return the document id
+        } else {
+          // Show a dialog since the user is not approved
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Awaiting Approval'),
+                content: Text(
+                    'Your account is still awaiting approval. Please contact the admin for further assistance.'),
+                actions: <Widget>[
+                  TextButton(
+                    child: Text('OK'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+          return null;
+        }
+      } else {
+        print('No matching representativeId found');
+        return null;
+      }
+    } catch (e) {
+      print('Error: $e');
+      return null;
+    }
+  }
+
+  Future<List<dynamic>?> getLocationsForPartnerId(String partnerId) async {
+    try {
+      DocumentReference docRef = userPartners.doc(partnerId);
       DocumentSnapshot docSnapshot = await docRef.get();
-      List<dynamic> locationsForDeliveryPartner =
-          List<dynamic>.from(docSnapshot['partner_locationID'] ?? []);
+      print("partnerId $docSnapshot");
+      List<String> locationsForDeliveryPartner =
+          List<String>.from(docSnapshot['locations'] ?? []);
+
       return locationsForDeliveryPartner;
     } catch (e) {
       print('Error: $e');
@@ -299,26 +269,43 @@ class FirebaseService {
     }
   }
 
-  Future<List<String>> fetchLocationNamesByLocationIds(
-      List<DocumentReference<Map<String, dynamic>>>? locations) async {
+  Future<List<String>?> fetchLocationNamesByLocationIds(
+      List<dynamic>? locations) async {
     List<String> locationNames = [];
-
+    List<String> extracteResults = [];
+    for (String locationRef in locations ?? []) {
+      List<String> parts = locationRef.split('/');
+      if (parts.length > 2) {
+        String result = parts.sublist(2).join('/');
+        extracteResults.add(result);
+        print("result $result"); // This will print the extracted substring
+      } else {
+        return null;
+      }
+    }
+    print(
+        "extracteResults $extracteResults"); // This will print the extracted substring
+    // extracteResults [R3whnAMDi374RJBvE67t, nYTz12ahki2R0rAwZzqz, MJrR2geqczDf3kRTiOxt]
     try {
-      for (DocumentReference<Map<String, dynamic>> locationRef
-          in locations ?? []) {
+      for ( String? locationRef in extracteResults) {
         // Check if the location is in the officeLocation collection
         DocumentSnapshot<Map<String, dynamic>> officeDoc =
-            await locationRef.get();
+            await officeLocation.doc(locationRef).get();
+        print("locationRef $locationRef");
         if (officeDoc.exists) {
-          locationNames.add("Office: ${officeDoc.data()!['name']}");
+          locationNames.add("${officeDoc.data()!['name']}");
         } else {
           // Check if the location is in the schoolLocation collection
           DocumentSnapshot<Map<String, dynamic>> schoolDoc =
-              await locationRef.get();
+              await schoolLocation.doc(locationRef).get();
           if (schoolDoc.exists) {
-            locationNames.add("School: ${schoolDoc.data()!['name']}");
+            locationNames.add("${schoolDoc.data()!['name']}");
+          } else {
+            // Print a message when neither officeDoc nor schoolDoc exists
+            print("Neither officeDoc nor schoolDoc exists for $locationRef");
           }
         }
+        print("locationNames: $locationNames");
       }
     } catch (e) {
       print('Error: $e');
