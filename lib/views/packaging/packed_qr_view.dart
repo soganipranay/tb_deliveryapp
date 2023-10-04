@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tb_deliveryapp/services/auth_manager.dart';
 import 'package:tb_deliveryapp/services/firebase_service.dart';
 
 class PackedQRView extends StatefulWidget {
@@ -109,6 +110,12 @@ class _PackedQRViewState extends State<PackedQRView> {
             height: 40, // Adjust the height as needed
           ),
         ),
+         actions: [
+          IconButton(onPressed: 
+          (){
+             AuthManager().logoutUser(context);
+          }, icon: Icon(Icons.logout))
+        ],
       ),
       body: Column(
         children: <Widget>[

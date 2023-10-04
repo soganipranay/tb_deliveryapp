@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tb_deliveryapp/services/auth_manager.dart';
 import 'package:tb_deliveryapp/views/process_view.dart';
 import 'package:tb_deliveryapp/services/firebase_service.dart';
 
@@ -51,6 +52,12 @@ class _HomeViewState extends State<HomeView> {
             height: 40,
           ),
         ),
+        actions: [
+          IconButton(onPressed: 
+          (){
+             AuthManager().logoutUser(context);
+          }, icon: Icon(Icons.logout))
+        ],
       ),
       body: Container(
         child: Column(
