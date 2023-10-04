@@ -29,13 +29,13 @@ class AuthManager {
         await saveUserLoggedIn(true);
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) =>
-              HomeView(isLoggedIn: true, partnerId: deliveryPartnerId),
+              HomeView(isLoggedIn: true, partnerId: deliveryPartnerId, partnerType: "DelPartner"),
         ));
       } else if (representativeId != null) {
         await saveUserLoggedIn(true);
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) =>
-              HomeView(isLoggedIn: true, partnerId: representativeId),
+              HomeView(isLoggedIn: true, partnerId: representativeId, partnerType: "Representative"),
         ));
       } else {
         // No partner found for that email
