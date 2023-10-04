@@ -14,7 +14,7 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   List<dynamic>? deliveryPartnerLocations = []; // Change the data type here
-
+  Map<String, dynamic> partnerDetails = {};
   @override
   void initState() {
     super.initState();
@@ -23,12 +23,16 @@ class _HomeViewState extends State<HomeView> {
 
   Future<void> initializeData() async {
     FirebaseService firebaseService = FirebaseService();
-    List<dynamic>? locations = await firebaseService
-        .getLocationsForPartnerId(widget.partnerId);
+    List<dynamic>? locations =
+        await firebaseService.getLocationsForPartnerId(widget.partnerId);
+    Map<String, dynamic> details =
+        await firebaseService.getPartnerDetails(widget.partnerId);
 
     if (locations != null) {
       setState(() {
         deliveryPartnerLocations = locations;
+        partnerDetails = details; // Store the details in the state
+        print("Partner Details: $partnerDetails");
         print("Home deliveryPartnerLocations $deliveryPartnerLocations");
       });
     }
@@ -51,6 +55,12 @@ class _HomeViewState extends State<HomeView> {
       body: Container(
         child: Column(
           children: [
+
+                    Text('Name: ${partnerDetails['display_name']}'),
+                    Text('Email: ${partnerDetails['email']}'),
+                    Text('Phone Number: ${partnerDetails['phone_number']}'),
+                    // Add more details as needed
+                  
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
