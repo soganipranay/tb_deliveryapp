@@ -23,14 +23,18 @@ class _HomeViewState extends State<HomeView> {
   late Future<Map<String, dynamic>> dataFuture;
   List<dynamic>? deliveryPartnerLocations = []; // Change the data type here
   Map<String, dynamic> partnerDetails = {};
-  late String name;
-  late String email;
-  late String phone;
+  late String name = "";
+  late String email = "";
+  late String phone = "";
   late String photoUrl = ''; // Initialize photoUrl with an empty string
+  late String retainedPartnerId;
 
   @override
   void initState() {
     super.initState();
+    retainedPartnerId = widget.partnerId;
+    initializeData();
+    print("partner type ${widget.partnerType}");
     dataFuture = initializeData();
   }
 
@@ -38,9 +42,9 @@ class _HomeViewState extends State<HomeView> {
     FirebaseService firebaseService = FirebaseService();
     try {
       List<dynamic>? locations =
-          await firebaseService.getLocationsForPartnerId(widget.partnerId);
+          await firebaseService.getLocationsForPartnerId(retainedPartnerId);
       Map<String, dynamic> details =
-          await firebaseService.getPartnerDetails(widget.partnerId);
+          await firebaseService.getPartnerDetails(retainedPartnerId);
 
       if (locations != null) {
         setState(() {
@@ -54,7 +58,7 @@ class _HomeViewState extends State<HomeView> {
           print("Home deliveryPartnerLocations $deliveryPartnerLocations");
         });
       }
-
+      print(partnerDetails);
       return partnerDetails;
     } catch (e) {
       print("Error fetching data: $e");
@@ -63,10 +67,12 @@ class _HomeViewState extends State<HomeView> {
           dynamic>(); // Return an empty map or handle it as needed.
     }
   }
-void _handleLogout() {
+
+  void _handleLogout() {
     AuthManager authManager = AuthManager();
     authManager.logoutUser(context);
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
