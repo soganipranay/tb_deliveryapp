@@ -27,6 +27,8 @@ class AuthManager {
       if (deliveryPartnerId != null) {
 
         await saveUserLoggedIn(true);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('partnerId', deliveryPartnerId);
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) =>
               HomeView(isLoggedIn: true, partnerId: deliveryPartnerId, partnerType: "Delivery Partner"),
@@ -75,5 +77,9 @@ class AuthManager {
     Navigator.of(context).pushReplacement(MaterialPageRoute(
       builder: (context) => LoginPage(),
     ));
+  }
+    Future<String> getPartnerId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('partnerId')?? "";
   }
 }
