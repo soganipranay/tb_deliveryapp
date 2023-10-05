@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tb_deliveryapp/widgets/bgWidget.dart';
 import 'package:tb_deliveryapp/views/loginAuth/login_page.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
@@ -26,7 +27,7 @@ class _SignUpPageState extends State<SignUpPage> {
   File? _backIdImage;
   String? _phoneNumber;
   bool _showPassword = false;
-
+  bool _isLoading = false;
   final List<String> _userTypes = ['Delivery Partner', 'Representative'];
 
   Future<void> _addUserDataToFirestore(User user) async {
@@ -198,160 +199,173 @@ class _SignUpPageState extends State<SignUpPage> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Name'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your name';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _name = value;
-                  },
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Email'),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    print("email $value");
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    } else if (!value.isValidEmail()) {
-                      return 'Email not Valid';
-                    }
-                    // You can add more email validation here if needed
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _email = value;
-                  },
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Phone Number'),
-                  keyboardType: TextInputType.phone,
-                  validator: (value) {
-                    print("phone $value");
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your number';
-                    }
-                    // You can add more email validation here if needed
-                    return null;
-                  }, 
-                  onSaved: (value) {
-                    _phoneNumber = (value);
-                  },
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Password'),
-                  obscureText: false,
-                  validator: (value) {
-                    print("password1: $value");
-                    _password = value;
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a password';
-                    }
-                    // You can add more password validation here if needed
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _password = value;
-                    print("password2: $_password");
-                  },
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Confirm Password'),
-                  obscureText: false,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please confirm your password';
-                    }
-                    if (value != _password) {
-                      print("password3: $value  value1: $_password");
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _confirmPassword = value;
-                    print("password4: $value  value1: $_password");
-                  },
-                ),
-                DropdownButtonFormField<String>(
-                  decoration: InputDecoration(labelText: 'User Type'),
-                  value: _userType,
-                  items: _userTypes.map((String userType) {
-                    return DropdownMenuItem<String>(
-                      value: userType,
-                      child: Text(userType),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _userType = value;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please select a user type';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 16.0),
-                _buildProfileImage(),
-                SizedBox(height: 16.0),
-                _buildFrontIdImage(),
-                SizedBox(height: 16.0),
-                _buildBackIdImage(),
-                SizedBox(height: 16.0),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
-                      try {
-                        // Create a new user with email and password
-                        UserCredential userCredential = await FirebaseAuth
-                            .instance
-                            .createUserWithEmailAndPassword(
-                          email: _email!,
-                          password: _password!,
-                        );
+      body: Stack(children: [
+        const BackgroundWidget(),
+        SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: _isLoading
+                ? Container(
+                  alignment: Alignment.center,
+                  child: Center(child: CircularProgressIndicator()))
+                : Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        TextFormField(
+                          decoration: InputDecoration(labelText: 'Name'),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your name';
+                            }
+                            return null;
+                          },
+                          onSaved: (value) {
+                            _name = value;
+                          },
+                        ),
+                        TextFormField(
+                          decoration: InputDecoration(labelText: 'Email'),
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your email';
+                            } else if (!value.isValidEmail()) {
+                              return 'Email not Valid';
+                            }
+                            // You can add more email validation here if needed
+                            return null;
+                          },
+                          onSaved: (value) {
+                            _email = value;
+                          },
+                        ),
+                        TextFormField(
+                          decoration:
+                              InputDecoration(labelText: 'Phone Number'),
+                          keyboardType: TextInputType.phone,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your number';
+                            }
+                            // You can add more email validation here if needed
+                            return null;
+                          },
+                          onSaved: (value) {
+                            _phoneNumber = (value);
+                          },
+                        ),
+                        TextFormField(
+                          decoration: InputDecoration(labelText: 'Password'),
+                          obscureText: false,
+                          validator: (value) {
+                            _password = value;
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a password';
+                            }
+                            // You can add more password validation here if needed
+                            return null;
+                          },
+                          onSaved: (value) {
+                            _password = value;
+                          },
+                        ),
+                        TextFormField(
+                          decoration:
+                              InputDecoration(labelText: 'Confirm Password'),
+                          obscureText: false,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please confirm your password';
+                            }
+                            if (value != _password) {
+                              return 'Passwords do not match';
+                            }
+                            return null;
+                          },
+                          onSaved: (value) {
+                            _confirmPassword = value;
+                          },
+                        ),
+                        DropdownButtonFormField<String>(
+                          decoration: InputDecoration(labelText: 'User Type'),
+                          value: _userType,
+                          items: _userTypes.map((String userType) {
+                            return DropdownMenuItem<String>(
+                              value: userType,
+                              child: Text(userType),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _userType = value;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select a user type';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 16.0),
+                        _buildProfileImage(),
+                        SizedBox(height: 16.0),
+                        _buildFrontIdImage(),
+                        SizedBox(height: 16.0),
+                        _buildBackIdImage(),
+                        SizedBox(height: 16.0),
+                        ElevatedButton(
+                          onPressed: _isLoading
+                              ? null
+                              : () async {
+                                  if (_formKey.currentState!.validate()) {
+                                    _formKey.currentState!.save();
+                                    setState(() {
+                                      _isLoading = true;
+                                    });
+                                    try {
+                                      // Create a new user with email and password
+                                      UserCredential userCredential =
+                                          await FirebaseAuth.instance
+                                              .createUserWithEmailAndPassword(
+                                        email: _email!,
+                                        password: _password!,
+                                      );
 
-                        // Check if the user is created successfully
-                        if (userCredential.user != null) {
-                          // User creation was successful
-                          // Add additional user data to Firestore
-                          await _addUserDataToFirestore(userCredential.user!);
+                                      // Check if the user is created successfully
+                                      if (userCredential.user != null) {
+                                        // User creation was successful
+                                        // Add additional user data to Firestore
+                                        await _addUserDataToFirestore(
+                                            userCredential.user!);
 
-                          // Navigate to the next screen or perform any desired action
-                          // For example:
-                          Navigator.of(context)
-                              .pushReplacement(MaterialPageRoute(
-                            builder: (context) => LoginPage(),
-                          ));
-                        }
-                      } catch (e) {
-                        // Handle any errors that occurred during user creation
-                        print("Error: $e");
-                      }
-                    }
-                  },
-                  child: Text('Sign Up'),
-                ),
-              ],
-            ),
+                                        // Navigate to the next screen or perform any desired action
+                                        // For example:
+                                        Navigator.of(context)
+                                            .pushReplacement(MaterialPageRoute(
+                                          builder: (context) => LoginPage(),
+                                        ));
+                                      }
+                                    } catch (e) {
+                                      // Handle any errors that occurred during user creation
+                                      print("Error: $e");
+                                    } finally {
+                                      setState(() {
+                                        _isLoading = false;
+                                      });
+                                    }
+                                  }
+                                },
+                          child: Text('Sign Up'),
+                        ),
+                      ],
+                    ),
+                  ),
           ),
         ),
-      ),
+      ]),
     );
   }
 }

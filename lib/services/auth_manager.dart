@@ -29,7 +29,7 @@ class AuthManager {
         await saveUserLoggedIn(true);
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) =>
-              HomeView(isLoggedIn: true, partnerId: deliveryPartnerId, partnerType: "DelPartner"),
+              HomeView(isLoggedIn: true, partnerId: deliveryPartnerId, partnerType: "Delivery Partner"),
         ));
       } else if (representativeId != null) {
         await saveUserLoggedIn(true);

@@ -12,13 +12,13 @@ class _LoginPageState extends State<LoginPage> {
   final AuthManager _authManager = AuthManager();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
+  bool _isLoading = false;
+  
   void _signIn() {
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
     _authManager.signInWithEmailAndPassword(email, password, context);
   }
-  
 
   @override
   Widget build(BuildContext context) {
@@ -100,8 +100,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          builder: (context) => SignUpPage()
-                        ));
+                            builder: (context) => SignUpPage()));
                       },
                       child: new Text("Create a new Account"),
                     ),
@@ -113,47 +112,3 @@ class _LoginPageState extends State<LoginPage> {
         ]));
   }
 }
-  
-  
-  // String email = '';
-  // String password = '';
-  
-  // void _loginCheck(){
-  //   print('Email: $email');
-  //   print('Password: $password');
-  //   if (email == "abc@tummybox.in" && password == "password"){
-  //     Navigator.of(context).push(MaterialPageRoute
-  //                   (
-  //                     builder: (context) => const PackedQRView(),
-  //                   ));
-  //   }
-  //   else{
-  //     print('Wrong Email ID or Password');
-  //     showDialog(
-  //             context: context,
-  //             builder: (BuildContext context) {
-  //               return AlertDialog(
-  //                 title: const Text('Unable to Login'),
-  //                 content: const Text('Wrong Email ID or Passoword was entered. Please try again.'),
-  //                 actions: <Widget>[
-  //                   // TextButton(
-  //                   //   onPressed: () {
-  //                   //     Navigator.of(context).pop(); // Close the dialog
-  //                   //   },
-  //                   //   child: Text('Cancel'),
-  //                   // ),
-  //                   ElevatedButton(
-  //                     onPressed: () {
-  //                       // Perform the retry action
-  //                       Navigator.of(context).pop(); // Close the dialog
-  //                     },
-  //                     style: ElevatedButton.styleFrom(
-  //                       backgroundColor: Colors.orange, // Use the accent color
-  //                     ),child: const Text('Retry'),
-  //                   )
-  //                 ]
-  //               );
-  //             }
-  //     );
-  //   }
-  // }

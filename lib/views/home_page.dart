@@ -87,7 +87,7 @@ class _HomeViewState extends State<HomeView> {
           } else if (!snapshot.hasData) {
             return Text('No Data');
           } else {
-            if (widget.partnerType == "DelPartner") {
+            if (widget.partnerType == "Delivery Partner") {
               return Container(
                 child: Center(
                   child: Column(
