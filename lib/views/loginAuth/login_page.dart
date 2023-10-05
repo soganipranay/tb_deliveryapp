@@ -12,12 +12,15 @@ class _LoginPageState extends State<LoginPage> {
   final AuthManager _authManager = AuthManager();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isLoading = false;
-  
+
+
   void _signIn() {
+
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
     _authManager.signInWithEmailAndPassword(email, password, context);
+
+    
   }
 
   @override
@@ -79,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 30),
                   ElevatedButton(
-                    onPressed: _signIn,
+                    onPressed:  _signIn,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                       padding: const EdgeInsets.symmetric(
@@ -88,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(
+                    child:  Text(
                       'Login',
                       style: TextStyle(
                         fontSize: 18,

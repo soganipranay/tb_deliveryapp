@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tb_deliveryapp/views/process_view.dart';
+import 'package:tb_deliveryapp/services/auth_manager.dart';
 import 'package:tb_deliveryapp/services/firebase_service.dart';
 import 'package:tb_deliveryapp/views/representative/count_handed.dart';
 
@@ -62,7 +63,10 @@ class _HomeViewState extends State<HomeView> {
           dynamic>(); // Return an empty map or handle it as needed.
     }
   }
-
+void _handleLogout() {
+    AuthManager authManager = AuthManager();
+    authManager.logoutUser(context);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,6 +80,12 @@ class _HomeViewState extends State<HomeView> {
             height: 40,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: _handleLogout, // Call the logout function here
+          ),
+        ],
       ),
       body: FutureBuilder(
         future: dataFuture,
@@ -203,7 +213,7 @@ class _HomeViewState extends State<HomeView> {
                       ]),
                 ),
               );
-            } else {
+            } else if (widget.partnerType == "Representative") {
               return Container(
                 child: Center(
                   child: Column(
@@ -291,6 +301,8 @@ class _HomeViewState extends State<HomeView> {
                       ]),
                 ),
               );
+            } else {
+              return const Text('No User found');
             }
           }
         },

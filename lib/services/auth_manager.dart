@@ -35,6 +35,8 @@ class AuthManager {
         ));
       } else if (representativeId != null) {
         await saveUserLoggedIn(true);
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('partnerId', representativeId);
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) =>
               HomeView(isLoggedIn: true, partnerId: representativeId, partnerType: "Representative"),
