@@ -12,7 +12,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   final AuthManager authManager =
-      AuthManager(); // Create an instance of AuthManager
+      AuthManager();
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +22,8 @@ class MyApp extends StatelessWidget {
           // Define your app's theme here
           // For example, you can set primary colors, fonts, etc.
           ),
-      home: FutureBuilder<bool>(
-        future: authManager.isUserLoggedIn(),
+      home: FutureBuilder<Map<String, String>>(
+        future: getPartnerInfo(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return MaterialApp(
@@ -34,7 +34,10 @@ class MyApp extends StatelessWidget {
               ),
             ); 
           } else {
-            final bool isLoggedIn = snapshot.data ?? false;
+           final bool isLoggedIn = snapshot.hasData;
+            final String partnerId = snapshot.data?['partnerId'] ?? "";
+            final String userType = snapshot.data?['userType'] ?? "";
+
 
             return FutureBuilder<String?>(
               future: authManager.getPartnerId(),
@@ -59,4 +62,14 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
+  Future<Map<String, String>> getPartnerInfo() async {
+    final String partnerId = await authManager.getPartnerId();
+    final String userType = await authManager.getPartnerUserType();
+
+    return {
+      'partnerId': partnerId,
+      'userType': userType,
+    };
+  }
 }
+

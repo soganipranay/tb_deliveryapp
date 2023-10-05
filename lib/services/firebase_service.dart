@@ -140,8 +140,9 @@ class FirebaseService {
     }
   }
 
-  Future<String?> getDeliveryPartnerId(
+  Future<List?> getDeliveryPartnerId(
       String userEmail, BuildContext context) async {
+    final getPartnerDetails = [];
     try {
       QuerySnapshot querySnapshot = await userPartners
           .where('email', isEqualTo: userEmail)
@@ -149,12 +150,12 @@ class FirebaseService {
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        // Assuming that userEmail is unique and only one document will match
         DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
         if (documentSnapshot['adminApproved'] == "Approved") {
-          return documentSnapshot.id; // Return the document id
+          final partnerType = documentSnapshot['userType'];
+          getPartnerDetails.add([partnerType, documentSnapshot.id]);
+          return getPartnerDetails; // Return the document id
         } else {
-          // Show a dialog since the user is not approved
           showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -185,8 +186,9 @@ class FirebaseService {
     }
   }
 
-  Future<String?> getRepresentativeId(
+  Future<List?> getRepresentativeId(
       String userEmail, BuildContext context) async {
+        final getPartnerDetails = [];
     try {
       QuerySnapshot querySnapshot = await userPartners
           .where('email', isEqualTo: userEmail)
@@ -197,7 +199,9 @@ class FirebaseService {
         // Assuming that userEmail is unique and only one document will match
         DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
         if (documentSnapshot['adminApproved'] == "Approved") {
-          return documentSnapshot.id; // Return the document id
+          final partnerType = documentSnapshot['userType'];
+          getPartnerDetails.add([partnerType, documentSnapshot.id]);
+          return getPartnerDetails; // Return the document id
         } else {
           // Show a dialog since the user is not approved
           showDialog(
@@ -230,7 +234,7 @@ class FirebaseService {
     }
   }
 
-Future<Map<String, dynamic>> getPartnerDetails(String partnerId) async {
+  Future<Map<String, dynamic>> getPartnerDetails(String partnerId) async {
     try {
       DocumentReference docRef = userPartners.doc(partnerId);
       DocumentSnapshot docSnapshot = await docRef.get();

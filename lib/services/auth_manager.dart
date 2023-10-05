@@ -19,27 +19,35 @@ class AuthManager {
       );
 
       // Retrieve the delivery partner ID based on the logged-in user's email
-      String? deliveryPartnerId =
+      List? deliveryPartnerId =
           await firebaseService.getDeliveryPartnerId(email, context);
-      String? representativeId =
+      List? representativeId =
           await firebaseService.getRepresentativeId(email, context);
-
-      if (deliveryPartnerId != null) {
-
-        await saveUserLoggedIn(true);
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('partnerId', deliveryPartnerId);
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) =>
-              HomeView(isLoggedIn: true, partnerId: deliveryPartnerId, partnerType: "Delivery Partner"),
-        ));
-      } else if (representativeId != null) {
+      print("deliveryPartnerId $deliveryPartnerId");
+      print("representativeId $representativeId");
+      if (deliveryPartnerId![0][1] != null) {
         await saveUserLoggedIn(true);
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('partnerId', representativeId);
+        await prefs.setString('partnerId', deliveryPartnerId[0][1]);
+        await prefs.setString('userType', deliveryPartnerId[0][0]);
+
         Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) =>
-              HomeView(isLoggedIn: true, partnerId: representativeId, partnerType: "Representative"),
+          builder: (context) => HomeView(
+              isLoggedIn: true,
+              partnerId: deliveryPartnerId[0][1],
+              partnerType: deliveryPartnerId[0][0]),
+        ));
+      } else if (representativeId![0][1] != null) {
+        await saveUserLoggedIn(true);
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('partnerId', representativeId[0][1]);
+        await prefs.setString('userType', representativeId[0][0]);
+
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => HomeView(
+              isLoggedIn: true,
+              partnerId: representativeId[1],
+              partnerType: representativeId[0]),
         ));
       } else {
         // No partner found for that email
@@ -80,8 +88,14 @@ class AuthManager {
       builder: (context) => LoginPage(),
     ));
   }
-    Future<String> getPartnerId() async {
+
+  Future<String> getPartnerId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('partnerId')?? "";
+    return prefs.getString('partnerId') ?? "";
+  }
+
+  Future<String> getPartnerUserType() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('userType') ?? "";
   }
 }
