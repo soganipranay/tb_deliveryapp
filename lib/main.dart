@@ -26,6 +26,7 @@ class MyApp extends StatelessWidget {
         future: getPartnerInfo(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
+            
             return MaterialApp(
               home: Scaffold(
                 body: Center(

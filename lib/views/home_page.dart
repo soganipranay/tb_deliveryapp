@@ -28,13 +28,15 @@ class _HomeViewState extends State<HomeView> {
   late String phone = "";
   late String photoUrl = ''; // Initialize photoUrl with an empty string
   late String retainedPartnerId;
+  late String retainedPartnertype;
 
   @override
   void initState() {
     super.initState();
     retainedPartnerId = widget.partnerId;
+    retainedPartnertype = widget.partnerType;
     initializeData();
-    print("partner type ${widget.partnerType}");
+    print("partner type ${retainedPartnertype}");
     dataFuture = initializeData();
   }
 
@@ -103,7 +105,7 @@ class _HomeViewState extends State<HomeView> {
           } else if (!snapshot.hasData) {
             return Text('No Data');
           } else {
-            if (widget.partnerType == "Delivery Partner") {
+            if (retainedPartnertype == "Delivery Partner") {
               return Container(
                 child: Center(
                   child: Column(
@@ -219,7 +221,7 @@ class _HomeViewState extends State<HomeView> {
                       ]),
                 ),
               );
-            } else if (widget.partnerType == "Representative") {
+            } else if (retainedPartnertype == "Representative") {
               return Container(
                 child: Center(
                   child: Column(

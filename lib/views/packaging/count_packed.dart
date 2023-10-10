@@ -25,7 +25,7 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
   List<Map<String, dynamic>> pendingOrdersList = [];
 
   List<String>? locationNames; // Declare the variable
-
+  bool isLoading = true; // A
   @override
   void initState() {
     super.initState();
@@ -33,16 +33,6 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
         widget.locationNames; // Initialize it with widget.locationNames
     countPackedOrders(); // Call the function to fetch the data
     print("packedOrdersList $packedOrdersList");
-    // firebaseService.fetchTotalOrders("AU Bank", widget.meal).then((value) {
-    //   if (mounted) {
-    //     setState(() {
-    //       totalOrders = value;
-    //     });
-    //   }
-    // }
-    // );
-    // print("totalOrders $totalOrders");
-    // print("location names ${widget.locationNames}");
   }
 
   @override
@@ -59,36 +49,41 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: locationNames?.map((locationName) {
-                final int pendingOrders =
-                    locationPendingOrders[locationName] ?? 0;
-                final int packedOrders =
-                    locationPackedOrders[locationName] ?? 0;
+      body: isLoading // Check if data is still loading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : SingleChildScrollView(
+              child: Column(
+                children: locationNames?.map((locationName) {
+                      final int pendingOrders =
+                          locationPendingOrders[locationName] ?? 0;
+                      final int packedOrders =
+                          locationPackedOrders[locationName] ?? 0;
 
-                return ListTile(
-                  title: Text(locationName),
-                  subtitle: Text(
-                    "Pending: $pendingOrders, Packed: $packedOrders",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green,
-                    ),
-                  ),
-                  tileColor: Colors.blue.withOpacity(0.1),
-                  onTap: () {
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (context) => PackedQRView(
-                              pendingOrdersList: pendingOrdersList,
-                            ))); // Pass locationNames
-                    // Handle tap event if needed
-                  },
-                );
-              }).toList() ??
-              [],
-        ),
-      ),
+                      return ListTile(
+                        title: Text(locationName),
+                        subtitle: Text(
+                          "Pending: $pendingOrders, Packed: $packedOrders",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
+                        tileColor: Colors.blue.withOpacity(0.1),
+                        onTap: () {
+                          Navigator.of(context)
+                              .pushReplacement(MaterialPageRoute(
+                                  builder: (context) => PackedQRView(
+                                        pendingOrdersList: pendingOrdersList,
+                                      ))); // Pass locationNames
+                          // Handle tap event if needed
+                        },
+                      );
+                    }).toList() ??
+                    [],
+              ),
+            ),
     );
   }
 
@@ -124,5 +119,9 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
         print("locationPendingOrders ${locationPendingOrders[location]}");
       });
     }
+    // A // Set loading state to false once data is fetched
+    setState(() {
+      isLoading = false;
+    });
   }
 }
