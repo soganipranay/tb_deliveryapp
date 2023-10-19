@@ -1,5 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tb_deliveryapp/all.dart';
+
+
+// ignore_for_file: avoid_print
+
+// ignore_for_file: use_build_context_synchronously
+Timer? locationUpdateTimer;
 
 class FirebaseService {
   final CollectionReference ordersCollection =
@@ -13,46 +18,10 @@ class FirebaseService {
 
   final CollectionReference<Map<String, dynamic>> schoolLocation =
       FirebaseFirestore.instance.collection('Schools');
+  final CollectionReference<Map<String, dynamic>> deliveryPartner =
+      FirebaseFirestore.instance.collection("DeliveryPartners");
 
-  // Future<int> fetchTotalOrders(String locations, String orderType) async {
-  //   try {
-  //     final CollectionReference ordersCollection =
-  //         FirebaseFirestore.instance.collection('Orders');
-  //     DateTime currentDate = DateTime.now();
-  //     int year = currentDate.year; // Year component
-  //     int month = currentDate.month; // Month component (1 to 12)
-  //     int day = currentDate.day; // Day component
-  //     late int totalOrders = 0;
-
-  //     currentDate = DateTime(year, month, day);
-
-  //     DateTime nextDate = currentDate.add(const Duration(days: 1));
-
-  //     print('Current Date: $currentDate');
-  //     print('Next Date: $nextDate');
-
-  //     QuerySnapshot querySnapshot = await ordersCollection
-  //         .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
-  //         .where('deliveryDate', isLessThan: nextDate)
-  //         .where('orderType', isEqualTo: orderType)
-  //         .where('location', isEqualTo: locations)
-  //         .get();
-
-  //     querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
-  //       // Get the reference of each document
-  //       DocumentReference documentReference = documentSnapshot.reference;
-  //       print('Document Path: ${documentReference.path}');
-  //       // get the count of the documents
-  //       totalOrders = querySnapshot.docs.length;
-  //       print('Total Orders: $totalOrders');
-  //     });
-
-  //     return totalOrders;
-  //   } catch (e) {
-  //     print("Error fetching total order references: $e");
-  //     return 0;
-  //   }
-  // }
+  
 
   Future<Map<String, dynamic>> fetchOrderByOrderStatus(
       String orderStatus, String location, String orderType) async {
@@ -63,7 +32,7 @@ class FirebaseService {
       final month = currentDate.month;
       final day = currentDate.day;
       final currentDateStart = DateTime(year, month, day);
-      final currentDateEnd = currentDateStart.add(Duration(days: 1));
+      final currentDateEnd = currentDateStart.add(const Duration(days: 1));
 
       final querySnapshot = await ordersCollection
           .where('deliveryDate', isGreaterThanOrEqualTo: currentDateStart)
@@ -99,7 +68,30 @@ class FirebaseService {
       };
     }
   }
+Future<void> markTiffinAsPicked(String orderRef, String pid) async {
+    try {
+      final tiffinsCollection =
+          FirebaseFirestore.instance.collection('Tiffins');
 
+      // Query the Tiffins collection for the specific tiffin entry to update
+      final querySnapshot = await tiffinsCollection
+          .where('orderID', isEqualTo: orderRef)
+          .where('status',
+              isEqualTo: 'Delivered') // Check for status "Delivered"
+          .get();
+
+      // If you have a unique entry, you can directly update it; otherwise, you may need to loop through the results if there are multiple entries.
+      if (querySnapshot.docs.isNotEmpty) {
+        for (var doc in querySnapshot.docs) {
+          await tiffinsCollection.doc(doc.id).update({
+            'status': 'Picked', // Update the status to "Picked"
+          });
+        }
+      }
+    } catch (e) {
+      print("Error marking tiffin as picked: $e");
+    }
+  }
   Future<void> updateOrderStatus(String orderId, String newStatus) async {
     try {
       final orderDocRef = ordersCollection.doc(orderId);
@@ -160,12 +152,12 @@ class FirebaseService {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: Text('Awaiting Approval'),
-                content: Text(
+                title: const Text('Awaiting Approval'),
+                content: const Text(
                     'Your account is still awaiting approval. Please contact the admin for further assistance.'),
                 actions: <Widget>[
                   TextButton(
-                    child: Text('OK'),
+                    child: const Text('OK'),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -177,6 +169,7 @@ class FirebaseService {
           return null;
         }
       } else {
+        // ignore: avoid_print
         print('No matching deliveryId found');
         return null;
       }
@@ -188,7 +181,7 @@ class FirebaseService {
 
   Future<List?> getRepresentativeId(
       String userEmail, BuildContext context) async {
-        final getPartnerDetails = [];
+    final getPartnerDetails = [];
     try {
       QuerySnapshot querySnapshot = await userPartners
           .where('email', isEqualTo: userEmail)
@@ -204,16 +197,17 @@ class FirebaseService {
           return getPartnerDetails; // Return the document id
         } else {
           // Show a dialog since the user is not approved
+          // ignore: use_build_context_synchronously
           showDialog(
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: Text('Awaiting Approval'),
-                content: Text(
+                title: const Text('Awaiting Approval'),
+                content: const Text(
                     'Your account is still awaiting approval. Please contact the admin for further assistance.'),
                 actions: <Widget>[
                   TextButton(
-                    child: Text('OK'),
+                    child: const Text('OK'),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -283,7 +277,7 @@ class FirebaseService {
       if (locations != null) {
         for (String locationRef in locations) {
           // Check if the location is in the officeLocation collection
-          DocumentReference officeDoc = await officeLocation.doc(locationRef);
+          DocumentReference officeDoc = officeLocation.doc(locationRef);
           DocumentSnapshot officeSnapshot = await officeDoc.get();
           print("locationRef $locationRef");
           if (officeSnapshot.exists) {
@@ -291,7 +285,7 @@ class FirebaseService {
             locationNames.add("${officeData["name"]}");
           } else {
             // Check if the location is in the schoolLocation collection
-            DocumentReference schoolDoc = await schoolLocation.doc(locationRef);
+            DocumentReference schoolDoc = schoolLocation.doc(locationRef);
             DocumentSnapshot schoolSnapshot = await schoolDoc.get();
             if (schoolSnapshot.exists) {
               final dynamic schoolData =
@@ -311,4 +305,73 @@ class FirebaseService {
 
     return locationNames;
   }
+
+  void startLocationUpdate(String partnerId) {
+    // Clear any existing timers to ensure only one timer runs
+    stopLocationUpdate();
+
+    // Start a timer that runs every 10 seconds
+     locationUpdateTimer = Timer.periodic(Duration(seconds: 10), (timer) {
+    // Get the partner's current location using Geolocator
+    Geolocator.getCurrentPosition().then((Position position) {
+        if (position != null) {
+          // Update the partner's location in the "locationUpdate" collection
+          DocumentReference locationUpdateRef = deliveryPartner.doc(partnerId);
+
+          // Set the new location data
+          locationUpdateRef.set({
+            'latitude': position.latitude,
+            'longitude': position.longitude,
+          });
+        }
+      }).catchError((error) {
+        print('Error getting location: $error');
+      });
+    });
+  }
+
+  void stopLocationUpdate() {
+    if (locationUpdateTimer != null) {
+      locationUpdateTimer!.cancel();
+    }
+  }
 }
+  // Future<int> fetchTotalOrders(String locations, String orderType) async {
+  //   try {
+  //     final CollectionReference ordersCollection =
+  //         FirebaseFirestore.instance.collection('Orders');
+  //     DateTime currentDate = DateTime.now();
+  //     int year = currentDate.year; // Year component
+  //     int month = currentDate.month; // Month component (1 to 12)
+  //     int day = currentDate.day; // Day component
+  //     late int totalOrders = 0;
+
+  //     currentDate = DateTime(year, month, day);
+
+  //     DateTime nextDate = currentDate.add(const Duration(days: 1));
+
+  //     print('Current Date: $currentDate');
+  //     print('Next Date: $nextDate');
+
+  //     QuerySnapshot querySnapshot = await ordersCollection
+  //         .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
+  //         .where('deliveryDate', isLessThan: nextDate)
+  //         .where('orderType', isEqualTo: orderType)
+  //         .where('location', isEqualTo: locations)
+  //         .get();
+
+  //     querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
+  //       // Get the reference of each document
+  //       DocumentReference documentReference = documentSnapshot.reference;
+  //       print('Document Path: ${documentReference.path}');
+  //       // get the count of the documents
+  //       totalOrders = querySnapshot.docs.length;
+  //       print('Total Orders: $totalOrders');
+  //     });
+
+  //     return totalOrders;
+  //   } catch (e) {
+  //     print("Error fetching total order references: $e");
+  //     return 0;
+  //   }
+  // }

@@ -1,10 +1,7 @@
-import 'dart:ffi';
-import 'package:flutter/material.dart';
-import 'delivering/delivered_qr_view.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tb_deliveryapp/services/firebase_service.dart';
-import 'package:tb_deliveryapp/views/packaging/count_packed.dart';
-import 'package:tb_deliveryapp/views/delivering/count_delivered.dart';
+import 'package:tb_deliveryapp/all.dart';
+
+
+
 
 class ProcessView extends StatefulWidget {
   const ProcessView({Key? key, required this.meal, required this.locations})
@@ -97,11 +94,11 @@ class _ProcessViewState extends State<ProcessView> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => CountDeliveredOrders(
+                        builder: (context) => CountPickedOrders(
                             meal: widget.meal,
                             locationNames: deliveryPartnerLocationName)));
               },
-              child: const Text('Picked'),
+              child: const Text('Picking'),
             ),
           ],
         )));

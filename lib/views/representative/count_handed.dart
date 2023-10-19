@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tb_deliveryapp/services/firebase_service.dart';
-import 'package:tb_deliveryapp/views/representative/handed_qr_view.dart';
+import 'package:tb_deliveryapp/all.dart';
+
 
 class RepresentativeOrders extends StatefulWidget {
   final String meal;

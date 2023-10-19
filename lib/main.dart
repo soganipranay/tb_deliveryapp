@@ -45,17 +45,24 @@ class MyApp extends StatelessWidget {
               builder: (context, partnerIdSnapshot) {
                 final String? partnerId = partnerIdSnapshot.data ?? "";
                 print("partnerId $partnerId");
-
+                if (partnerId == null)
+                {
+                  return LoginPage();
+                }
                 // Check if the user is authenticated and decide which screen to display
-                final Widget initialRoute = isLoggedIn
+                else{
+                    final Widget initialRoute = isLoggedIn
                     ? HomeView(
-                        isLoggedIn: false,
-                        partnerId: partnerId ?? "",
+                        isLoggedIn: true,
+                        partnerId: partnerId,
                         partnerType: '',
                       )
                     : LoginPage();
 
                 return initialRoute;
+                }
+                
+                
               },
             );
           }

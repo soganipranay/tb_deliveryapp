@@ -1,8 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:tb_deliveryapp/views/process_view.dart';
-import 'package:tb_deliveryapp/services/auth_manager.dart';
-import 'package:tb_deliveryapp/services/firebase_service.dart';
-import 'package:tb_deliveryapp/views/representative/count_handed.dart';
+import 'package:tb_deliveryapp/all.dart';
 
 class HomeView extends StatefulWidget {
   final bool isLoggedIn;
@@ -39,6 +35,8 @@ class _HomeViewState extends State<HomeView> {
     print("partner type ${retainedPartnertype}");
     dataFuture = initializeData();
   }
+
+
 
   Future<Map<String, dynamic>> initializeData() async {
     FirebaseService firebaseService = FirebaseService();

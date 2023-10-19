@@ -1,9 +1,6 @@
-import 'dart:io';
 import 'dart:developer';
-import 'package:flutter/material.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tb_deliveryapp/services/firebase_service.dart';
+import 'package:tb_deliveryapp/all.dart';
+
 
 class PickedQRView extends StatefulWidget {
   final List<Map<String, dynamic>> deliveredOrdersList; // Add this field
@@ -21,7 +18,7 @@ class _PickedQRViewState extends State<PickedQRView> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   late List<Map<String, dynamic>> scannedOrderDetails = [];
   late String profileType;
-  bool allOrdersDelivered = false;
+  bool allOrdersPicked = false;
 
   void _onQRViewCreated(QRViewController controller) {
     setState(() {
@@ -52,22 +49,22 @@ class _PickedQRViewState extends State<PickedQRView> {
           scannedOrderDetails.add(orderDetails!);
         });
 
-        // Check if all orders are delivered and the delivered order list is empty
-        bool allDelivered = true;
+        // Check if all orders are delivered and the picked order list is empty
+        bool allPicked = true;
         for (var orderItem in scannedOrderDetails) {
-          if (orderItem['orderStatus'] != 'Delivered') {
-            allDelivered = false;
+          if (orderItem['orderStatus'] != 'Picked') {
+            allPicked = false;
             break;
           }
         }
-        if (allDelivered && widget.deliveredOrdersList.isEmpty) {
+        if (allPicked && widget.deliveredOrdersList.isEmpty) {
           // Prepare a list of orders to update in Firestore
           List<Map<String, dynamic>> ordersToUpdate = [];
           for (var orderItem in scannedOrderDetails) {
-            if (orderItem['orderStatus'] == 'Delivered') {
+            if (orderItem['orderStatus'] == 'Picked') {
               ordersToUpdate.add({
                 'orderRef': orderItem['orderRef'],
-                'orderStatus': 'Delivered',
+                'orderStatus': 'Picked',
               });
             }
           }
@@ -100,7 +97,7 @@ class _PickedQRViewState extends State<PickedQRView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Packaging'),
+        title: const Text('Picking'),
         leading: Padding(
           padding: const EdgeInsets.all(6.0),
           child: Image.asset(
@@ -125,8 +122,8 @@ class _PickedQRViewState extends State<PickedQRView> {
                     itemCount: scannedOrderDetails.length,
                     itemBuilder: (context, index) {
                       final orderItem = scannedOrderDetails[index];
-                      bool isDelivered =
-                          orderItem['orderStatus'] == 'Delivered';
+                      bool isPicked =
+                          orderItem['orderStatus'] == 'Picked';
 
                       return ListTile(
                         title: Text("Order Name: ${orderItem['orderName']}"),
@@ -138,7 +135,7 @@ class _PickedQRViewState extends State<PickedQRView> {
                             const Divider(),
                           ],
                         ),
-                        trailing: isDelivered
+                        trailing: isPicked
                             ? Icon(
                                 Icons.circle,
                                 color: Colors.green,
@@ -159,16 +156,18 @@ class _PickedQRViewState extends State<PickedQRView> {
                       for (var orderItem in scannedOrderDetails) {
                         if (orderItem['orderStatus'] == 'Delivered') {
                           await firebaseService.updateOrderStatus(
+                              orderItem['orderRef'], 'Picked');
+                             await firebaseService.markTiffinAsPicked(
                               orderItem['orderRef'], 'Delivered');
                           // Update the order status in the local list
-                          orderItem['orderStatus'] = 'Delivered';
-                          print("Delivered: ${orderItem['orderRef']}");
+                          orderItem['orderStatus'] = 'Picked';
+                          print("Picked: ${orderItem['orderRef']}");
                         } else {
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
                               return AlertDialog(
-                                title: const Text('Order already delivered'),
+                                title: const Text('Order already Picked'),
                                 content: Text(orderItem['orderRef']),
                                 actions: <Widget>[
                                   ElevatedButton(
@@ -196,7 +195,7 @@ class _PickedQRViewState extends State<PickedQRView> {
                 minimumSize: const Size(100, 40),
                 textStyle: const TextStyle(fontSize: 14),
               ),
-              child: const Text('Delivered', style: TextStyle(fontSize: 10)),
+              child: const Text('Picked', style: TextStyle(fontSize: 10)),
             ),
           ),
         ],

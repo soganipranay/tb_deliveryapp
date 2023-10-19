@@ -1,11 +1,8 @@
-import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tb_deliveryapp/widgets/bgWidget.dart';
-import 'package:tb_deliveryapp/views/loginAuth/login_page.dart';
+import 'package:tb_deliveryapp/all.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+
+
+
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key});

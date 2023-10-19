@@ -1,7 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:tb_deliveryapp/services/firebase_service.dart';
-import 'package:tb_deliveryapp/views/picking/picked_qr_view.dart';
-
+import 'package:tb_deliveryapp/all.dart';
 
 class CountPickedOrders extends StatefulWidget {
   final String meal;
@@ -51,7 +48,7 @@ class _CountPickedOrdersState extends State<CountPickedOrders> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Delivering for ${widget.meal}'),
+        title: Text('Picking for ${widget.meal}'),
         leading: Padding(
           padding: const EdgeInsets.all(6.0),
           child: Image.asset(

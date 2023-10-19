@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
-import '../../services/auth_manager.dart';
-import 'package:tb_deliveryapp/widgets/bgWidget.dart';
-import 'package:tb_deliveryapp/views/loginAuth/signUp.dart';
+import 'package:tb_deliveryapp/all.dart';
+
 
 class LoginPage extends StatefulWidget {
   @override

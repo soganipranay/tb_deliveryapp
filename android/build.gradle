@@ -12,13 +12,10 @@ buildscript {
     }
 }
 
-// plugins {
-//     // Remove the following line
-//     id 'com.google.gms.google-services' version '4.3.15'
-// }
 
 allprojects {
     repositories {
+
         google()
         mavenCentral()
     }
@@ -35,3 +32,4 @@ subprojects {
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
+

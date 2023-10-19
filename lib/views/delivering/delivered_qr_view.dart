@@ -1,14 +1,13 @@
-import 'dart:io';
 import 'dart:developer';
-import 'package:flutter/material.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tb_deliveryapp/services/firebase_service.dart';
+import 'package:tb_deliveryapp/all.dart';
 
 class DeliveredQRView extends StatefulWidget {
   final List<Map<String, dynamic>> packedOrdersList; // Add this field
+  final String locationName;
 
-  DeliveredQRView({Key? key, required this.packedOrdersList}) : super(key: key);
+  DeliveredQRView(
+      {Key? key, required this.packedOrdersList, required this.locationName})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _DeliveredQRViewState();
@@ -162,6 +161,13 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                               orderItem['orderRef'], 'Delivered');
                           // Update the order status in the local list
                           orderItem['orderStatus'] = 'Delivered';
+                          print(
+                              "Updated Tiffin: ${orderItem['orderRef']} ${orderItem['pid']}, ${orderItem['quantity']},");
+                          markTiffinAsDelivered(
+                            orderItem['orderRef'],
+                            orderItem['pid'],
+                            orderItem['quantity']
+                          );
                           print("Delivered: ${orderItem['orderRef']}");
                         } else {
                           showDialog(
@@ -237,5 +243,32 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
   void dispose() {
     controller?.dispose();
     super.dispose();
+  }
+
+  Future<void> markTiffinAsDelivered(
+      String orderId, String pid, int numberOfItems) async {
+    try {
+      // Update the status of the order to "Delivered" in the Orders collection
+      final ordersCollection = FirebaseFirestore.instance.collection('Orders');
+      await ordersCollection.doc(orderId).update({'Status': 'Delivered'});
+
+      // Add the corresponding entry to the Tiffins collection
+      final tiffinsCollection =
+          FirebaseFirestore.instance.collection('Tiffins');
+      final tiffinData = {
+        'locationRef':
+            widget.locationName, // Update with your location reference
+        'orderID': orderId,
+        'pid': pid, // Update with the appropriate value
+        'status': 'Delivered',
+        'tiffinCondition': ' ', // Update with the condition
+        'tiffinCount':
+            numberOfItems, // You can set this to the number of items in the list
+      };
+
+      await tiffinsCollection.add(tiffinData);
+    } catch (e) {
+      print("Error marking order as delivered: $e");
+    }
   }
 }

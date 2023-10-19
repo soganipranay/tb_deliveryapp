@@ -1,9 +1,5 @@
-import 'package:flutter/material.dart';
-import '../views/loginAuth/login_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:tb_deliveryapp/views/home_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tb_deliveryapp/services/firebase_service.dart';
+import 'package:tb_deliveryapp/all.dart';
+
 
 class AuthManager {
   FirebaseService firebaseService = FirebaseService();

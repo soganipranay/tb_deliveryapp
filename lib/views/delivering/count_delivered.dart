@@ -1,7 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:tb_deliveryapp/services/firebase_service.dart';
-import 'package:tb_deliveryapp/views/packaging/packed_qr_view.dart';
-import 'package:tb_deliveryapp/views/delivering/delivered_qr_view.dart';
+import 'package:tb_deliveryapp/all.dart';
 
 class CountDeliveredOrders extends StatefulWidget {
   final String meal;
@@ -35,16 +32,6 @@ class _CountDeliveredOrdersState extends State<CountDeliveredOrders> {
         widget.locationNames; // Initialize it with widget.locationNames
     countDeliveredOrders(); // Call the function to fetch the data
     print("deliveredOrdersList $deliveredOrdersList");
-    // firebaseService.fetchTotalOrders("AU Bank", widget.meal).then((value) {
-    //   if (mounted) {
-    //     setState(() {
-    //       totalOrders = value;
-    //     });
-    //   }
-    // }
-    // );
-    // print("totalOrders $totalOrders");
-    // print("location names ${widget.locationNames}");
   }
 
   @override
@@ -88,6 +75,7 @@ class _CountDeliveredOrdersState extends State<CountDeliveredOrders> {
                               .pushReplacement(MaterialPageRoute(
                                   builder: (context) => DeliveredQRView(
                                         packedOrdersList: packedOrdersList,
+                                        locationName: locationName
                                       ))); // Pass locationNames
                           // Handle tap event if needed
                         },

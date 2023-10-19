@@ -1,9 +1,7 @@
-import 'dart:io';
 import 'dart:developer';
-import 'package:flutter/material.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tb_deliveryapp/services/firebase_service.dart';
+import 'package:tb_deliveryapp/all.dart';
+
+
 
 class PackedQRView extends StatefulWidget {
   final List<Map<String, dynamic>> pendingOrdersList; // Add this field
