@@ -1,9 +1,8 @@
 import 'dart:developer';
 import 'package:tb_deliveryapp/all.dart';
 
-
 class PickedQRView extends StatefulWidget {
-  final List<Map<String, dynamic>> deliveredOrdersList; // Add this field
+  final List<Map<String, dynamic>> deliveredOrdersList;
 
   PickedQRView({Key? key, required this.deliveredOrdersList}) : super(key: key);
 
@@ -18,7 +17,22 @@ class _PickedQRViewState extends State<PickedQRView> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   late List<Map<String, dynamic>> scannedOrderDetails = [];
   late String profileType;
-  bool allOrdersPicked = false;
+
+  // Initialize the list of picked orders
+  List<Map<String, dynamic>> pickedOrders = [];
+  List<Map<String, dynamic>> deliveredOrders = [];
+
+  @override
+  void initState() {
+    super.initState();
+    deliveredOrders = List.from(widget.deliveredOrdersList);
+  }
+
+  void updateOrderToPicked(Map<String, dynamic> order) {
+    setState(() {
+      order['orderStatus'] = 'Picked';
+    });
+  }
 
   void _onQRViewCreated(QRViewController controller) {
     setState(() {
@@ -32,8 +46,8 @@ class _PickedQRViewState extends State<PickedQRView> {
       // Check if the scanned QR code exists in the deliveredOrdersList
       bool found = false;
       Map<String, dynamic>? orderDetails;
-      print(widget.deliveredOrdersList);
-      for (var orderItem in widget.deliveredOrdersList) {
+
+      for (var orderItem in deliveredOrders) {
         if (orderItem['pid'] == result!.code.toString()) {
           found = true;
           orderDetails = orderItem;
@@ -42,50 +56,35 @@ class _PickedQRViewState extends State<PickedQRView> {
       }
 
       if (found) {
-        // Handle the case when the QR code is found in deliveredOrdersList
-        print("QR Code found in deliveredOrdersList: ${result!.code.toString()}");
+        print(
+            "QR Code found in deliveredOrdersList: ${result!.code.toString()}");
         setState(() {
           scannedOrderDetails.clear();
           scannedOrderDetails.add(orderDetails!);
         });
 
-        // Check if all orders are delivered and the picked order list is empty
-        bool allPicked = true;
-        for (var orderItem in scannedOrderDetails) {
-          if (orderItem['orderStatus'] != 'Picked') {
-            allPicked = false;
+        bool isAlreadyPicked = false;
+
+        for (var orderItem in pickedOrders) {
+          if (orderItem['pid'] == orderDetails!['pid']) {
+            isAlreadyPicked = true;
             break;
           }
         }
-        if (allPicked && widget.deliveredOrdersList.isEmpty) {
-          // Prepare a list of orders to update in Firestore
-          List<Map<String, dynamic>> ordersToUpdate = [];
-          for (var orderItem in scannedOrderDetails) {
-            if (orderItem['orderStatus'] == 'Picked') {
-              ordersToUpdate.add({
-                'orderRef': orderItem['orderRef'],
-                'orderStatus': 'Picked',
-              });
-            }
-          }
-          // Update the Firestore collection with delivered orders
-          await firebaseService.updateOrdersInFirestore(ordersToUpdate);
-          print("Orders updated in Firestore");
+
+        if (!isAlreadyPicked) {
+          pickedOrders.add(orderDetails!);
         }
       } else {
-        // Handle the case when the QR code is not found in deliveredOrdersList
         print(
             "QR Code not found in deliveredOrdersList: ${result!.code.toString()}");
         setState(() {
           scannedOrderDetails.clear();
         });
-        // You can show an error message or perform other actions as needed.
       }
     });
   }
 
-  // In order to get hot reload to work we need to pause the camera if the platform
-  // is android, or resume the camera if the platform is iOS.
   @override
   void reassemble() {
     super.reassemble();
@@ -101,9 +100,9 @@ class _PickedQRViewState extends State<PickedQRView> {
         leading: Padding(
           padding: const EdgeInsets.all(6.0),
           child: Image.asset(
-            'assets/TummyBox_Logo_wbg.png', // Replace with the actual path to your logo image
-            width: 40, // Adjust the width as needed
-            height: 40, // Adjust the height as needed
+            'assets/TummyBox_Logo_wbg.png',
+            width: 40,
+            height: 40,
           ),
         ),
       ),
@@ -117,34 +116,31 @@ class _PickedQRViewState extends State<PickedQRView> {
             height: 16,
           ),
           Expanded(
-            child: scannedOrderDetails.isNotEmpty
-                ? ListView.builder(
-                    itemCount: scannedOrderDetails.length,
-                    itemBuilder: (context, index) {
-                      final orderItem = scannedOrderDetails[index];
-                      bool isPicked =
-                          orderItem['orderStatus'] == 'Picked';
+            child: ListView.builder(
+              itemCount: deliveredOrders.length,
+              itemBuilder: (context, index) {
+                final orderItem = deliveredOrders[index];
+                bool isPicked = orderItem['orderStatus'] == 'Picked';
 
-                      return ListTile(
-                        title: Text("Order Name: ${orderItem['orderName']}"),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Quantity: ${orderItem['quantity']}"),
-                            Text("Order Type: ${orderItem['orderType']}"),
-                            const Divider(),
-                          ],
-                        ),
-                        trailing: isPicked
-                            ? Icon(
-                                Icons.circle,
-                                color: Colors.green,
-                              )
-                            : null, // Display green dot if delivered, null otherwise
-                      );
-                    },
-                  )
-                : const Text('Scan a code'),
+                return ListTile(
+                  title: Text("Order Name: ${orderItem['orderName']}"),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Quantity: ${orderItem['quantity']}"),
+                      Text("Order Type: ${orderItem['orderType']}"),
+                      const Divider(),
+                    ],
+                  ),
+                  trailing: isPicked
+                      ? const Icon(
+                          Icons.circle,
+                          color: Colors.green,
+                        )
+                      : null,
+                );
+              },
+            ),
           ),
           Container(
             margin: const EdgeInsets.all(8),
@@ -155,14 +151,11 @@ class _PickedQRViewState extends State<PickedQRView> {
                       result = null;
                       for (var orderItem in scannedOrderDetails) {
                         if (orderItem['orderStatus'] == 'Delivered') {
-                          await firebaseService.updateOrderStatus(
-                              orderItem['orderRef'], 'Picked');
-                             await firebaseService.markTiffinAsPicked(
-                              orderItem['orderRef'], 'Delivered');
-                          // Update the order status in the local list
-                          orderItem['orderStatus'] = 'Picked';
+                          updateOrderToPicked(orderItem);
+                          // You can also update Firebase here if needed
                           print("Picked: ${orderItem['orderRef']}");
                         } else {
+                          // ignore: use_build_context_synchronously
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
@@ -185,8 +178,7 @@ class _PickedQRViewState extends State<PickedQRView> {
                         }
                       }
                       await controller?.resumeCamera();
-                      setState(
-                          () {}); // Refresh the UI to reflect the updated status
+                      setState(() {});
                     }
                   : () {},
               style: ElevatedButton.styleFrom(
