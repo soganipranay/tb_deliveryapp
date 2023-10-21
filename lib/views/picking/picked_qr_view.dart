@@ -28,11 +28,11 @@ class _PickedQRViewState extends State<PickedQRView> {
     deliveredOrders = List.from(widget.deliveredOrdersList);
   }
 
-  void updateOrderToPicked(Map<String, dynamic> order) {
-    setState(() {
-      order['orderStatus'] = 'Picked';
-    });
-  }
+  // void updateOrderToPicked(Map<String, dynamic> order) {
+  //   setState(() {
+  //     order['orderStatus'] = 'Picked';
+  //   });
+  // }
 
   void _onQRViewCreated(QRViewController controller) {
     setState(() {
@@ -46,12 +46,13 @@ class _PickedQRViewState extends State<PickedQRView> {
       // Check if the scanned QR code exists in the deliveredOrdersList
       bool found = false;
       Map<String, dynamic>? orderDetails;
-
+      // final currentDate = DateTime.now();
       for (var orderItem in deliveredOrders) {
         if (orderItem['pid'] == result!.code.toString()) {
-          found = true;
-          orderDetails = orderItem;
-          break;
+            found = true;
+            orderDetails = orderItem;
+            break;
+          
         }
       }
 
@@ -74,6 +75,9 @@ class _PickedQRViewState extends State<PickedQRView> {
 
         if (!isAlreadyPicked) {
           pickedOrders.add(orderDetails!);
+          // Now that you've determined an order needs to be marked as "Picked," call the function to update its status.
+          await markTiffinAsPicked(
+              orderDetails['orderRef'], orderDetails['pid'], orderDetails['userTiffinCount'], orderDetails['tiffinCount']);
         }
       } else {
         print(
@@ -151,9 +155,22 @@ class _PickedQRViewState extends State<PickedQRView> {
                       result = null;
                       for (var orderItem in scannedOrderDetails) {
                         if (orderItem['orderStatus'] == 'Delivered') {
-                          updateOrderToPicked(orderItem);
-                          // You can also update Firebase here if needed
-                          print("Picked: ${orderItem['orderRef']}");
+                          if (orderItem['tiffinCount'] > 1) {
+                            // Show the quantity input dialog
+                            await _showQuantityDialog(context, orderItem);
+                          } else {
+                            // If there's only one item, just update userTiffinCount
+                            orderItem['userTiffinCount'] = 1;
+                          }
+                          await firebaseService.updateOrderStatus(
+                              orderItem['orderRef'], 'Picked');
+                          orderItem['orderStatus'] = 'Picked';
+                          markTiffinAsPicked(
+                              orderItem['orderRef'],
+                              orderItem['pid'],
+                              orderItem['userTiffinCount'],
+                              orderItem['tiffinCount']);
+                          print("Delivered: ${orderItem['orderRef']}");
                         } else {
                           // ignore: use_build_context_synchronously
                           showDialog(
@@ -228,5 +245,75 @@ class _PickedQRViewState extends State<PickedQRView> {
   void dispose() {
     controller?.dispose();
     super.dispose();
+  }
+
+  Future<void> _showQuantityDialog(
+      BuildContext context, Map<String, dynamic> orderDetails) async {
+    int receivedQuantity = 0;
+
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enter Received Quantity'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                decoration: InputDecoration(labelText: 'Received Quantity'),
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  receivedQuantity = int.tryParse(value) ?? 0;
+                },
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              onPressed: () async {
+                if (receivedQuantity > 0 &&
+                    receivedQuantity <= orderDetails['tiffinCount']) {
+                  orderDetails['userTiffinCount'] =
+                      orderDetails['tiffinCount'] - receivedQuantity;
+                  Navigator.of(context).pop();
+                }
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> markTiffinAsPicked(String orderRef, String pid, int userTiffinCount, int tiffinCount ) async {
+    try {
+      final tiffinsCollection =
+          FirebaseFirestore.instance.collection('Tiffins');
+      final currentDate = DateTime.now();
+      final year = currentDate.year;
+      final month = currentDate.month;
+      final day = currentDate.day;
+      final currentDateStart = DateTime(year, month, day);
+      // Query the Tiffins collection for the specific tiffin entry to update
+      final querySnapshot = await tiffinsCollection
+          .where('orderID', isEqualTo: orderRef)
+          .where('status', isEqualTo: 'Delivered')
+          .where('deliveryDate',
+              isLessThan: currentDateStart) // Check for status "Delivered"
+          .get();
+
+      // If you have a unique entry, you can directly update it; otherwise, you may need to loop through the results if there are multiple entries.
+      if (querySnapshot.docs.isNotEmpty) {
+        for (var doc in querySnapshot.docs) {
+          await tiffinsCollection.doc(doc.id).update({
+            'status': 'Picked', // Update the status to "Picked"
+
+          });
+        }
+      }
+    } catch (e) {
+      print("Error marking tiffin as picked: $e");
+    }
   }
 }

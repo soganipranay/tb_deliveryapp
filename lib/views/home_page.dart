@@ -31,12 +31,10 @@ class _HomeViewState extends State<HomeView> {
     super.initState();
     retainedPartnerId = widget.partnerId;
     retainedPartnertype = widget.partnerType;
-    initializeData();
-    print("partner type ${retainedPartnertype}");
+    // print("partner type ${retainedPartnertype}");
     dataFuture = initializeData();
+    print("dataFuture $dataFuture");
   }
-
-
 
   Future<Map<String, dynamic>> initializeData() async {
     FirebaseService firebaseService = FirebaseService();
@@ -50,10 +48,11 @@ class _HomeViewState extends State<HomeView> {
         setState(() {
           deliveryPartnerLocations = locations;
           partnerDetails = details; // Store the details in the state
-          name = partnerDetails['display_name'];
-          email = partnerDetails['email'];
-          phone = partnerDetails['phone_number'];
-          photoUrl = partnerDetails['photo_url'];
+          // name = partnerDetails['display_name'];
+          // email = partnerDetails['email'];
+          // phone = partnerDetails['phone_number'];
+          // photoUrl = partnerDetails['photo_url'];
+          // print("photoUrl $photoUrl");
           print("Partner Details: $partnerDetails");
           print("Home deliveryPartnerLocations $deliveryPartnerLocations");
         });
@@ -103,6 +102,10 @@ class _HomeViewState extends State<HomeView> {
           } else if (!snapshot.hasData) {
             return Text('No Data');
           } else {
+            name = snapshot.data?['display_name'] ?? "";
+            email = snapshot.data?['email'] ?? "";
+            phone = snapshot.data?['phone_number']?? "";
+            photoUrl = snapshot.data?['photo_url'] ?? "";
             if (retainedPartnertype == "Delivery Partner") {
               return Container(
                 child: Center(

@@ -21,7 +21,52 @@ class FirebaseService {
   final CollectionReference<Map<String, dynamic>> deliveryPartner =
       FirebaseFirestore.instance.collection("DeliveryPartners");
 
-  
+  Future<Map<String, dynamic>> fetchOrderforPickingStatus(
+      String orderStatus, String location, String orderType) async {
+    try {
+      final ordersCollection = FirebaseFirestore.instance.collection('Orders');
+      final currentDate = DateTime.now();
+      final year = currentDate.year;
+      final month = currentDate.month;
+      final day = currentDate.day;
+      final currentDateStart = DateTime(year, month, day);
+      final currentDateEnd = currentDateStart.add(const Duration(days: 1));
+
+      final querySnapshot = await ordersCollection
+          // .where('deliveryDate', isGreaterThanOrEqualTo: currentDateStart)
+          .where('deliveryDate', isLessThan: currentDateStart)
+          .where('Status', isEqualTo: orderStatus)
+          .where('location', isEqualTo: location)
+          .where('orderType', isEqualTo: orderType)
+          .get();
+      final totalOrders = querySnapshot.size;
+
+      final ordersList = querySnapshot.docs.map((documentSnapshot) {
+        final data = documentSnapshot.data();
+        return {
+          'orderRef': documentSnapshot.reference.id,
+          'orderName': data['orderName'],
+          'quantity': data['numberOfItems'],
+          'orderType': data['orderType'],
+          'orderStatus': data['Status'],
+          'orderLocation': data['location'],
+          'pid': data['pid'],
+          'deliveryDate': data['deliveryDate']
+        };
+      }).toList();
+      print(ordersList);
+      return {
+        'totalOrders': totalOrders,
+        'ordersList': ordersList,
+      };
+    } catch (e) {
+      print("Error fetching order count references: $e");
+      return {
+        'totalOrders': 0,
+        'ordersList': [],
+      };
+    }
+  }
 
   Future<Map<String, dynamic>> fetchOrderByOrderStatus(
       String orderStatus, String location, String orderType) async {
@@ -53,6 +98,7 @@ class FirebaseService {
           'orderStatus': data['Status'],
           'orderLocation': data['location'],
           'pid': data['pid'],
+          'deliveryDate': data['deliveryDate']
         };
       }).toList();
       print(ordersList);
@@ -68,30 +114,7 @@ class FirebaseService {
       };
     }
   }
-Future<void> markTiffinAsPicked(String orderRef, String pid) async {
-    try {
-      final tiffinsCollection =
-          FirebaseFirestore.instance.collection('Tiffins');
 
-      // Query the Tiffins collection for the specific tiffin entry to update
-      final querySnapshot = await tiffinsCollection
-          .where('orderID', isEqualTo: orderRef)
-          .where('status',
-              isEqualTo: 'Delivered') // Check for status "Delivered"
-          .get();
-
-      // If you have a unique entry, you can directly update it; otherwise, you may need to loop through the results if there are multiple entries.
-      if (querySnapshot.docs.isNotEmpty) {
-        for (var doc in querySnapshot.docs) {
-          await tiffinsCollection.doc(doc.id).update({
-            'status': 'Picked', // Update the status to "Picked"
-          });
-        }
-      }
-    } catch (e) {
-      print("Error marking tiffin as picked: $e");
-    }
-  }
   Future<void> updateOrderStatus(String orderId, String newStatus) async {
     try {
       final orderDocRef = ordersCollection.doc(orderId);
@@ -336,42 +359,4 @@ Future<void> markTiffinAsPicked(String orderRef, String pid) async {
     }
   }
 }
-  // Future<int> fetchTotalOrders(String locations, String orderType) async {
-  //   try {
-  //     final CollectionReference ordersCollection =
-  //         FirebaseFirestore.instance.collection('Orders');
-  //     DateTime currentDate = DateTime.now();
-  //     int year = currentDate.year; // Year component
-  //     int month = currentDate.month; // Month component (1 to 12)
-  //     int day = currentDate.day; // Day component
-  //     late int totalOrders = 0;
-
-  //     currentDate = DateTime(year, month, day);
-
-  //     DateTime nextDate = currentDate.add(const Duration(days: 1));
-
-  //     print('Current Date: $currentDate');
-  //     print('Next Date: $nextDate');
-
-  //     QuerySnapshot querySnapshot = await ordersCollection
-  //         .where('deliveryDate', isGreaterThanOrEqualTo: currentDate)
-  //         .where('deliveryDate', isLessThan: nextDate)
-  //         .where('orderType', isEqualTo: orderType)
-  //         .where('location', isEqualTo: locations)
-  //         .get();
-
-  //     querySnapshot.docs.forEach((QueryDocumentSnapshot documentSnapshot) {
-  //       // Get the reference of each document
-  //       DocumentReference documentReference = documentSnapshot.reference;
-  //       print('Document Path: ${documentReference.path}');
-  //       // get the count of the documents
-  //       totalOrders = querySnapshot.docs.length;
-  //       print('Total Orders: $totalOrders');
-  //     });
-
-  //     return totalOrders;
-  //   } catch (e) {
-  //     print("Error fetching total order references: $e");
-  //     return 0;
-  //   }
-  // }
+  

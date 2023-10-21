@@ -35,6 +35,7 @@ class MyApp extends StatelessWidget {
               ),
             ); 
           } else {
+            
            final bool isLoggedIn = snapshot.hasData;
             final String partnerId = snapshot.data?['partnerId'] ?? "";
             final String userType = snapshot.data?['userType'] ?? "";
@@ -45,6 +46,7 @@ class MyApp extends StatelessWidget {
               builder: (context, partnerIdSnapshot) {
                 final String? partnerId = partnerIdSnapshot.data ?? "";
                 print("partnerId $partnerId");
+                print("userType $userType");
                 if (partnerId == null)
                 {
                   return LoginPage();
@@ -55,7 +57,7 @@ class MyApp extends StatelessWidget {
                     ? HomeView(
                         isLoggedIn: true,
                         partnerId: partnerId,
-                        partnerType: '',
+                        partnerType: userType,
                       )
                     : LoginPage();
 
@@ -73,8 +75,9 @@ class MyApp extends StatelessWidget {
   Future<Map<String, String>> getPartnerInfo() async {
     final String partnerId = await authManager.getPartnerId();
     final String userType = await authManager.getPartnerUserType();
-
+    print(userType);
     return {
+      
       'partnerId': partnerId,
       'userType': userType,
     };

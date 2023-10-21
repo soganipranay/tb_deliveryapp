@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:intl/intl.dart';
 import 'package:tb_deliveryapp/all.dart';
 
 class DeliveredQRView extends StatefulWidget {
@@ -161,13 +162,11 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                               orderItem['orderRef'], 'Delivered');
                           // Update the order status in the local list
                           orderItem['orderStatus'] = 'Delivered';
-                          print(
-                              "Updated Tiffin: ${orderItem['orderRef']} ${orderItem['pid']}, ${orderItem['quantity']},");
                           markTiffinAsDelivered(
-                            orderItem['orderRef'],
-                            orderItem['pid'],
-                            orderItem['quantity']
-                          );
+                              orderItem['orderRef'],
+                              orderItem['pid'],
+                              orderItem['quantity'],
+                              orderItem['deliveryDate']);
                           print("Delivered: ${orderItem['orderRef']}");
                         } else {
                           showDialog(
@@ -245,14 +244,13 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
     super.dispose();
   }
 
-  Future<void> markTiffinAsDelivered(
-      String orderId, String pid, int numberOfItems) async {
+  Future<void> markTiffinAsDelivered(String orderId, String pid,
+      int numberOfItems, Timestamp deliveryDate) async {
     try {
       // Update the status of the order to "Delivered" in the Orders collection
       final ordersCollection = FirebaseFirestore.instance.collection('Orders');
       await ordersCollection.doc(orderId).update({'Status': 'Delivered'});
-
-      // Add the corresponding entry to the Tiffins collection
+      print('deliveryDate $deliveryDate');
       final tiffinsCollection =
           FirebaseFirestore.instance.collection('Tiffins');
       final tiffinData = {
@@ -264,8 +262,10 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
         'tiffinCondition': ' ', // Update with the condition
         'tiffinCount':
             numberOfItems, // You can set this to the number of items in the list
+        'deliveryDate': deliveryDate,
+        'userTiffinCount': ''
       };
-
+      print(tiffinData);
       await tiffinsCollection.add(tiffinData);
     } catch (e) {
       print("Error marking order as delivered: $e");

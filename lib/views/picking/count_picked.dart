@@ -4,8 +4,7 @@ class CountPickedOrders extends StatefulWidget {
   final String meal;
   final List<String>? locationNames;
 
-  CountPickedOrders(
-      {Key? key, required this.meal, required this.locationNames})
+  CountPickedOrders({Key? key, required this.meal, required this.locationNames})
       : super(key: key);
 
   @override
@@ -32,16 +31,6 @@ class _CountPickedOrdersState extends State<CountPickedOrders> {
         widget.locationNames; // Initialize it with widget.locationNames
     countPickedOrders(); // Call the function to fetch the data
     print("pickedOrdersList $pickedOrdersList");
-    // firebaseService.fetchTotalOrders("AU Bank", widget.meal).then((value) {
-    //   if (mounted) {
-    //     setState(() {
-    //       totalOrders = value;
-    //     });
-    //   }
-    // }
-    // );
-    // print("totalOrders $totalOrders");
-    // print("location names ${widget.locationNames}");
   }
 
   @override
@@ -84,7 +73,8 @@ class _CountPickedOrdersState extends State<CountPickedOrders> {
                           Navigator.of(context)
                               .pushReplacement(MaterialPageRoute(
                                   builder: (context) => PickedQRView(
-                                        deliveredOrdersList: deliveredOrdersList,
+                                        deliveredOrdersList:
+                                            deliveredOrdersList,
                                       ))); // Pass locationNames
                           // Handle tap event if needed
                         },
@@ -97,6 +87,7 @@ class _CountPickedOrdersState extends State<CountPickedOrders> {
   }
 
   Future<void> countPickedOrders() async {
+    final currentDate = DateTime.now();
     for (String location in widget.locationNames ?? []) {
       // Fetch the total picked orders for the current location
       final Map<String, dynamic> pickedOrders = await firebaseService
@@ -105,12 +96,26 @@ class _CountPickedOrdersState extends State<CountPickedOrders> {
       final List<Map<String, dynamic>> pickedOrdersData = pickedOrders[
           'ordersList']; // Use a different variable name to avoid conflict
 
+      final List<Map<String, dynamic>> pickedOrdersDataFiltered =
+          pickedOrdersData.where((order) {
+        DateTime deliveryDate = order['deliveryDate'].toDate();
+        return deliveryDate.isBefore(currentDate);
+      }).toList();
+
       // Fetch the total delivered orders for the current location
       final Map<String, dynamic> deliveredOrders = await firebaseService
-          .fetchOrderByOrderStatus('Delivered', location, widget.meal);
+          .fetchOrderforPickingStatus('Delivered', location, widget.meal);
       final int totalDeliveredOrders = deliveredOrders['totalOrders'];
       final List<Map<String, dynamic>> deliveredOrdersData = deliveredOrders[
           'ordersList']; // Use a different variable name to avoid conflict
+      print("deliveredOrdersData $deliveredOrdersData");
+      final List<Map<String, dynamic>> deliveredOrdersDataFiltered =
+          deliveredOrdersData.where((order) {
+        DateTime deliveryDate = order['deliveryDate'].toDate();
+        print("deliveryDate ${deliveryDate.isBefore(currentDate)}");
+        return deliveryDate.isBefore(currentDate);
+      }).toList();
+      print("deliveredOrdersDataFiltered $deliveredOrdersDataFiltered");
 
       // Update the locationpickedOrders and locationDeliveredOrders maps
       setState(() {
@@ -118,11 +123,11 @@ class _CountPickedOrdersState extends State<CountPickedOrders> {
         locationDeliveredOrders[location] = totalDeliveredOrders;
 
         // Update the lists
-        pickedOrdersList.addAll(pickedOrdersData);
-        deliveredOrdersList.addAll(deliveredOrdersData);
+        pickedOrdersList.addAll(pickedOrdersDataFiltered);
+        deliveredOrdersList.addAll(deliveredOrdersDataFiltered);
 
-        print(" pickedOrdersList $pickedOrdersList");
-        print(" deliveredOrdersList $deliveredOrdersList");
+        print("pickedOrdersList $pickedOrdersList");
+        print("deliveredOrdersList $deliveredOrdersList");
 
         print("locationPickedOrders ${locationPickedOrders[location]}");
         print("locationDeliveredOrders ${locationDeliveredOrders[location]}");

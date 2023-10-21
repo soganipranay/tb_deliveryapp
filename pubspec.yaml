@@ -46,6 +46,7 @@ dependencies:
   geolocator: ^10.1.0
   firebase_database: ^10.2.7
   permission_handler: ^11.0.1
+  intl: ^0.18.1
   # flutter_background_geolocation: ^4.13.3
 
 dev_dependencies:
