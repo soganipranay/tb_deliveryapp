@@ -1,18 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:tb_deliveryapp/views/home_page.dart';
-import 'package:tb_deliveryapp/services/auth_manager.dart';
-import 'package:tb_deliveryapp/views/loginAuth/login_page.dart';
+import 'package:tb_deliveryapp/all.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await FirebaseService().initNotifications();
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final AuthManager authManager =
-      AuthManager();
+  final AuthManager authManager = AuthManager();
 
   @override
   Widget build(BuildContext context) {
@@ -26,45 +23,41 @@ class MyApp extends StatelessWidget {
         future: getPartnerInfo(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            
-            return MaterialApp(
+            return const MaterialApp(
               home: Scaffold(
                 body: Center(
                   child: CircularProgressIndicator(),
                 ),
               ),
-            ); 
+            );
           } else {
-            
-           final bool isLoggedIn = snapshot.hasData;
+            final bool isLoggedIn = snapshot.hasData;
             final String partnerId = snapshot.data?['partnerId'] ?? "";
             final String userType = snapshot.data?['userType'] ?? "";
-
 
             return FutureBuilder<String?>(
               future: authManager.getPartnerId(),
               builder: (context, partnerIdSnapshot) {
-                final String? partnerId = partnerIdSnapshot.data ?? "";
+                // final String? partnerId = partnerIdSnapshot.data ?? "";
                 print("partnerId $partnerId");
                 print("userType $userType");
-                if (partnerId == null)
-                {
+                if (partnerId.isEmpty || userType.isEmpty) {
+                  // If partnerId or userType is empty, log the user out and show the login page
+                  authManager.logoutUser(context);
                   return LoginPage();
                 }
                 // Check if the user is authenticated and decide which screen to display
-                else{
-                    final Widget initialRoute = isLoggedIn
-                    ? HomeView(
-                        isLoggedIn: true,
-                        partnerId: partnerId,
-                        partnerType: userType,
-                      )
-                    : LoginPage();
+                else {
+                  final Widget initialRoute = isLoggedIn
+                      ? HomeView(
+                          isLoggedIn: true,
+                          partnerId: partnerId,
+                          partnerType: userType,
+                        )
+                      : LoginPage();
 
-                return initialRoute;
+                  return initialRoute;
                 }
-                
-                
               },
             );
           }
@@ -72,15 +65,14 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
+
   Future<Map<String, String>> getPartnerInfo() async {
     final String partnerId = await authManager.getPartnerId();
     final String userType = await authManager.getPartnerUserType();
     print(userType);
     return {
-      
       'partnerId': partnerId,
       'userType': userType,
     };
   }
 }
-

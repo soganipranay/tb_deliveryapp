@@ -104,7 +104,7 @@ class _HomeViewState extends State<HomeView> {
           } else {
             name = snapshot.data?['display_name'] ?? "";
             email = snapshot.data?['email'] ?? "";
-            phone = snapshot.data?['phone_number']?? "";
+            phone = snapshot.data?['phone_number'] ?? "";
             photoUrl = snapshot.data?['photo_url'] ?? "";
             if (retainedPartnertype == "Delivery Partner") {
               return Container(
@@ -311,7 +311,10 @@ class _HomeViewState extends State<HomeView> {
                 ),
               );
             } else {
-              return const Text('No User found');
+              return Center(
+                child: Text('Unknown User Type'),
+              );
+              
             }
           }
         },

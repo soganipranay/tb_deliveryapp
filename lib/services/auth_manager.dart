@@ -81,6 +81,9 @@ class AuthManager {
   Future<void> logoutUser(BuildContext context) async {
     await saveUserLoggedIn(false); // Clear login state
     // Navigate back to the login page
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('partnerId'); // Remove partnerId
+    await prefs.remove('userType');
     Navigator.of(context).pushReplacement(MaterialPageRoute(
       builder: (context) => LoginPage(),
     ));

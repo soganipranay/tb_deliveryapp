@@ -247,6 +247,7 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
   Future<void> markTiffinAsDelivered(String orderId, String pid,
       int numberOfItems, Timestamp deliveryDate) async {
     try {
+      int userTiffinCount = 0;
       // Update the status of the order to "Delivered" in the Orders collection
       final ordersCollection = FirebaseFirestore.instance.collection('Orders');
       await ordersCollection.doc(orderId).update({'Status': 'Delivered'});
@@ -263,7 +264,7 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
         'tiffinCount':
             numberOfItems, // You can set this to the number of items in the list
         'deliveryDate': deliveryDate,
-        'userTiffinCount': ''
+        'userTiffinCount': userTiffinCount
       };
       print(tiffinData);
       await tiffinsCollection.add(tiffinData);

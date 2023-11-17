@@ -21,7 +21,7 @@ class _PickedQRViewState extends State<PickedQRView> {
   // Initialize the list of picked orders
   List<Map<String, dynamic>> pickedOrders = [];
   List<Map<String, dynamic>> deliveredOrders = [];
-
+  int userTiffinCount = 0;
   @override
   void initState() {
     super.initState();
@@ -43,48 +43,52 @@ class _PickedQRViewState extends State<PickedQRView> {
         result = scanData;
       });
 
-      // Check if the scanned QR code exists in the deliveredOrdersList
-      bool found = false;
-      Map<String, dynamic>? orderDetails;
-      // final currentDate = DateTime.now();
-      for (var orderItem in deliveredOrders) {
-        if (orderItem['pid'] == result!.code.toString()) {
+      if (result != null && result!.code != null) {
+        // Check if the scanned QR code exists in the deliveredOrdersList
+        bool found = false;
+        Map<String, dynamic>? orderDetails;
+        // final currentDate = DateTime.now();
+        for (var orderItem in deliveredOrders) {
+          if (orderItem['pid'] == result!.code.toString()) {
             found = true;
             orderDetails = orderItem;
-            break;
-          
-        }
-      }
-
-      if (found) {
-        print(
-            "QR Code found in deliveredOrdersList: ${result!.code.toString()}");
-        setState(() {
-          scannedOrderDetails.clear();
-          scannedOrderDetails.add(orderDetails!);
-        });
-
-        bool isAlreadyPicked = false;
-
-        for (var orderItem in pickedOrders) {
-          if (orderItem['pid'] == orderDetails!['pid']) {
-            isAlreadyPicked = true;
             break;
           }
         }
 
-        if (!isAlreadyPicked) {
-          pickedOrders.add(orderDetails!);
-          // Now that you've determined an order needs to be marked as "Picked," call the function to update its status.
-          await markTiffinAsPicked(
-              orderDetails['orderRef'], orderDetails['pid'], orderDetails['userTiffinCount'], orderDetails['tiffinCount']);
+        if (found) {
+          print(
+              "QR Code found in deliveredOrdersList: ${result!.code.toString()}");
+          setState(() {
+            scannedOrderDetails.clear();
+            scannedOrderDetails.add(orderDetails!);
+          });
+
+          bool isAlreadyPicked = false;
+
+          for (var orderItem in pickedOrders) {
+            if (orderItem['pid'] == orderDetails!['pid']) {
+              isAlreadyPicked = true;
+              break;
+            }
+          }
+
+          if (!isAlreadyPicked) {
+            pickedOrders.add(orderDetails!);
+            // Now that you've determined an order needs to be marked as "Picked," call the function to update its status.
+            await markTiffinAsPicked(
+                orderDetails['orderRef'],
+                orderDetails['pid'],
+                orderDetails['userTiffinCount'],
+                orderDetails['tiffinCount']);
+          }
+        } else {
+          print(
+              "QR Code not found in deliveredOrdersList: ${result!.code.toString()}");
+          setState(() {
+            scannedOrderDetails.clear();
+          });
         }
-      } else {
-        print(
-            "QR Code not found in deliveredOrdersList: ${result!.code.toString()}");
-        setState(() {
-          scannedOrderDetails.clear();
-        });
       }
     });
   }
@@ -155,12 +159,13 @@ class _PickedQRViewState extends State<PickedQRView> {
                       result = null;
                       for (var orderItem in scannedOrderDetails) {
                         if (orderItem['orderStatus'] == 'Delivered') {
-                          if (orderItem['tiffinCount'] > 1) {
+                          print("orderItem $orderItem");
+                          if (orderItem['quantity'] > 1) {
                             // Show the quantity input dialog
                             await _showQuantityDialog(context, orderItem);
                           } else {
                             // If there's only one item, just update userTiffinCount
-                            orderItem['userTiffinCount'] = 1;
+                            userTiffinCount = 1;
                           }
                           await firebaseService.updateOrderStatus(
                               orderItem['orderRef'], 'Picked');
@@ -168,8 +173,8 @@ class _PickedQRViewState extends State<PickedQRView> {
                           markTiffinAsPicked(
                               orderItem['orderRef'],
                               orderItem['pid'],
-                              orderItem['userTiffinCount'],
-                              orderItem['tiffinCount']);
+                              userTiffinCount,
+                              orderItem['quantity']);
                           print("Delivered: ${orderItem['orderRef']}");
                         } else {
                           // ignore: use_build_context_synchronously
@@ -271,10 +276,9 @@ class _PickedQRViewState extends State<PickedQRView> {
           actions: <Widget>[
             ElevatedButton(
               onPressed: () async {
-                if (receivedQuantity > 0 &&
-                    receivedQuantity <= orderDetails['tiffinCount']) {
-                  orderDetails['userTiffinCount'] =
-                      orderDetails['tiffinCount'] - receivedQuantity;
+                if (receivedQuantity <= orderDetails['quantity']) {
+                  userTiffinCount =
+                      orderDetails['quantity'] - receivedQuantity;
                   Navigator.of(context).pop();
                 }
               },
@@ -286,31 +290,38 @@ class _PickedQRViewState extends State<PickedQRView> {
     );
   }
 
-  Future<void> markTiffinAsPicked(String orderRef, String pid, int userTiffinCount, int tiffinCount ) async {
+  Future<void> markTiffinAsPicked(String orderRef, String pid,
+      int? userTiffinCount, int tiffinCount) async {
     try {
-      final tiffinsCollection =
-          FirebaseFirestore.instance.collection('Tiffins');
-      final currentDate = DateTime.now();
-      final year = currentDate.year;
-      final month = currentDate.month;
-      final day = currentDate.day;
-      final currentDateStart = DateTime(year, month, day);
-      // Query the Tiffins collection for the specific tiffin entry to update
-      final querySnapshot = await tiffinsCollection
-          .where('orderID', isEqualTo: orderRef)
-          .where('status', isEqualTo: 'Delivered')
-          .where('deliveryDate',
-              isLessThan: currentDateStart) // Check for status "Delivered"
-          .get();
+      if (userTiffinCount != null) {
+        final tiffinsCollection =
+            FirebaseFirestore.instance.collection('Tiffins');
+        final currentDate = DateTime.now();
+        final year = currentDate.year;
+        final month = currentDate.month;
+        final day = currentDate.day;
+        final currentDateStart = DateTime(year, month, day);
 
-      // If you have a unique entry, you can directly update it; otherwise, you may need to loop through the results if there are multiple entries.
-      if (querySnapshot.docs.isNotEmpty) {
-        for (var doc in querySnapshot.docs) {
-          await tiffinsCollection.doc(doc.id).update({
-            'status': 'Picked', // Update the status to "Picked"
+        // Query the Tiffins collection for the specific tiffin entry to update
+        final querySnapshot = await tiffinsCollection
+            .where('orderID', isEqualTo: orderRef)
+            .where('status', isEqualTo: 'Delivered')
+            .where('deliveryDate',
+                isLessThan: currentDateStart) // Check for status "Delivered"
+            .get();
 
-          });
+        // If you have a unique entry, you can directly update it; otherwise, you may need to loop through the results if there are multiple entries.
+        print(userTiffinCount);
+        if (querySnapshot.docs.isNotEmpty) {
+          for (var doc in querySnapshot.docs) {
+            await tiffinsCollection.doc(doc.id).update({
+              'status': 'Picked', // Update the status to "Picked"
+              'userTiffinCount': userTiffinCount
+            });
+          }
         }
+      } else {
+        print("userTiffinCount is null. Skipping the update.");
       }
     } catch (e) {
       print("Error marking tiffin as picked: $e");

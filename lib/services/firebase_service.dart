@@ -1,5 +1,5 @@
+import 'package:http/http.dart' as http;
 import 'package:tb_deliveryapp/all.dart';
-
 
 // ignore_for_file: avoid_print
 
@@ -7,6 +7,8 @@ import 'package:tb_deliveryapp/all.dart';
 Timer? locationUpdateTimer;
 
 class FirebaseService {
+  final _firebaseMessaging = FirebaseMessaging.instance;
+
   final CollectionReference ordersCollection =
       FirebaseFirestore.instance.collection('Orders');
   final CollectionReference timeCollection =
@@ -143,6 +145,7 @@ class FirebaseService {
 
       // Update the order status
       batch.update(orderDocRef, {'orderStatus': newStatus});
+      updateOrderStatusAndTriggerNotification(orderRef, newStatus);
     }
 
     try {
@@ -152,6 +155,33 @@ class FirebaseService {
     } catch (e) {
       print('Error updating orders in Firestore: $e');
       // Handle the error as needed
+    }
+  }
+
+  void updateOrderStatusAndTriggerNotification(
+      String orderId, String newStatus) async {
+    try {
+      // Update the order status locally in your Dart code
+      // ...
+
+      // Make an HTTP POST request to trigger the Cloud Function
+      final cloudFunctionURL =
+          'https://us-central1-tummybox-f2238.cloudfunctions.net/sendOrderStatusNotification ';
+      final response = await http.post(
+        Uri.parse(cloudFunctionURL),
+        body: {'orderId': orderId, 'newStatus': newStatus},
+      );
+
+      if (response.statusCode == 200) {
+        // The Cloud Function was triggered successfully.
+        print('Cloud Function triggered successfully');
+      } else {
+        // Handle the error if the Cloud Function was not triggered successfully.
+        print('Error triggering Cloud Function: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Handle exceptions if any.
+      print('Error: $e');
     }
   }
 
@@ -334,9 +364,9 @@ class FirebaseService {
     stopLocationUpdate();
 
     // Start a timer that runs every 10 seconds
-     locationUpdateTimer = Timer.periodic(Duration(seconds: 10), (timer) {
-    // Get the partner's current location using Geolocator
-    Geolocator.getCurrentPosition().then((Position position) {
+    locationUpdateTimer = Timer.periodic(Duration(seconds: 10), (timer) {
+      // Get the partner's current location using Geolocator
+      Geolocator.getCurrentPosition().then((Position position) {
         if (position != null) {
           // Update the partner's location in the "locationUpdate" collection
           DocumentReference locationUpdateRef = deliveryPartner.doc(partnerId);
@@ -358,5 +388,17 @@ class FirebaseService {
       locationUpdateTimer!.cancel();
     }
   }
+
+  Future<void> handleBackgroundMessage(RemoteMessage message) async {
+    print('Title: ${message.notification?.title}');
+    print('Body: ${message.notification?.body}');
+    print('Payload: ${message.data}');
+  }
+
+  Future<void> initNotifications() async {
+    await _firebaseMessaging.requestPermission();
+    final fCMToken = await _firebaseMessaging.getToken();
+    print('fCMToken : $fCMToken');
+    FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
+  }
 }
-  
