@@ -48,7 +48,7 @@ class FirebaseService {
         return {
           'orderRef': documentSnapshot.reference.id,
           'orderName': data['orderName'],
-          'quantity': data['numberOfItems'],
+          'quantity': data['quantity'],
           'orderType': data['orderType'],
           'orderStatus': data['Status'],
           'orderLocation': data['location'],
@@ -85,7 +85,7 @@ class FirebaseService {
           .where('deliveryDate', isGreaterThanOrEqualTo: currentDateStart)
           .where('deliveryDate', isLessThan: currentDateEnd)
           .where('Status', isEqualTo: orderStatus)
-          .where('location', isEqualTo: location)
+          .where('locationName', isEqualTo: location)
           .where('orderType', isEqualTo: orderType)
           .get();
       final totalOrders = querySnapshot.size;
@@ -95,7 +95,7 @@ class FirebaseService {
         return {
           'orderRef': documentSnapshot.reference.id,
           'orderName': data['orderName'],
-          'quantity': data['numberOfItems'],
+          'quantity': data['quantity'],
           'orderType': data['orderType'],
           'orderStatus': data['Status'],
           'orderLocation': data['location'],
@@ -169,7 +169,9 @@ class FirebaseService {
           'https://us-central1-tummybox-f2238.cloudfunctions.net/sendOrderStatusNotification ';
       final response = await http.post(
         Uri.parse(cloudFunctionURL),
-        body: {'orderId': orderId, 'newStatus': newStatus},
+        body: {
+          "req": {"orderId": orderId, "newStatus": newStatus}
+        },
       );
 
       if (response.statusCode == 200) {
@@ -289,7 +291,7 @@ class FirebaseService {
       if (docSnapshot.exists) {
         final data = docSnapshot.data() as Map<String, dynamic>;
         return {
-          'name': docSnapshot.reference.id,
+          'PartnerefID': docSnapshot.reference.id,
           'display_name': data['display_name'],
           'email': data['email'],
           'locations': data['locations'],

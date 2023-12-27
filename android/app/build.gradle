@@ -29,12 +29,7 @@ apply plugin: 'com.google.gms.google-services'
 
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
-// plugins {
-//   id 'com.android.application'
 
-//   // Add the Google services Gradle plugin
-//   id 'com.google.gms.google-services'
-// }
 
 android {
     namespace "com.example.tb_deliveryapp"

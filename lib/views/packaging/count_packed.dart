@@ -87,6 +87,7 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
   }
 
   Future<void> countPackedOrders() async {
+    print(widget.locationNames);
     for (String location in widget.locationNames ?? []) {
       // Fetch the total packed orders for the current location
       final Map<String, dynamic> packedOrders = await firebaseService
@@ -98,6 +99,7 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
       // Fetch the total pending orders for the current location
       final Map<String, dynamic> pendingOrders = await firebaseService
           .fetchOrderByOrderStatus('Pending', location, widget.meal);
+
       final int totalPendingOrders = pendingOrders['totalOrders'];
       final List<Map<String, dynamic>> pendingOrdersData = pendingOrders[
           'ordersList']; // Use a different variable name to avoid conflict

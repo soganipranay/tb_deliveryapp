@@ -34,7 +34,7 @@ exports.downloadOrders = functions.https.onRequest(async (req, res) => {
         orderId: doc.id,
         deliveryDate: orderData.deliveryDate,
         orderName: orderData.orderName,
-        numberOfItems: orderData.numberOfItems,
+        quantity: orderData.quantity,
         orderType: orderData.orderType,
       });
     });
