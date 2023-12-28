@@ -96,7 +96,7 @@ class _HomeViewState extends State<HomeView> {
         future: dataFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator(); // Display a loading indicator while fetching data.
+            return Center(child: CircularProgressIndicator()); // Display a loading indicator while fetching data.
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           } else if (!snapshot.hasData) {

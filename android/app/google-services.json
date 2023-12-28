@@ -7,12 +7,33 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:335574407035:android:f36f3029ee250153140fde",
+        "mobilesdk_app_id": "1:335574407035:android:bdb18fd61de54e4c140fde",
         "android_client_info": {
-          "package_name": "com.example.tb_deliveryapp"
+          "package_name": "com.TummyBoxPvtLtd.tummybox"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "335574407035-istmbgv7m4rj1d8e73nh211p0evivurj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.TummyBoxPvtLtd.tummybox",
+            "certificate_hash": "9bbb3186b2189ef16d8f272bdab59362c395cbb4"
+          }
+        },
+        {
+          "client_id": "335574407035-rkth941nqr9ar40o9c06q9cldgdb7drb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.TummyBoxPvtLtd.tummybox",
+            "certificate_hash": "3b05fdd9f2900e13c00c404e99194ed53b38f566"
+          }
+        },
+        {
+          "client_id": "335574407035-l3uoav3roetgom7r876s09p1bgdi6d07.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB2KcnPJ8d-A5mui2IQfYscKzS92BuyFx4"
@@ -20,18 +41,51 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "335574407035-l3uoav3roetgom7r876s09p1bgdi6d07.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "335574407035-ee3gnvb1q38b9g7l0rniocs896pvdlqc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mycompany.tummyboxadmin"
+              }
+            }
+          ]
         }
       }
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:335574407035:android:8e9f5d984dff9b45140fde",
+        "mobilesdk_app_id": "1:335574407035:android:f36f3029ee250153140fde",
         "android_client_info": {
-          "package_name": "com.mycompany.tummybox"
+          "package_name": "com.example.tb_deliveryapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "335574407035-ii0vgi77uakgpb4jo357nna3pgap2vot.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.tb_deliveryapp",
+            "certificate_hash": "9bbb3186b2189ef16d8f272bdab59362c395cbb4"
+          }
+        },
+        {
+          "client_id": "335574407035-kt8kocdvb683athue9kn2556jsb9h3ej.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.tb_deliveryapp",
+            "certificate_hash": "3b05fdd9f2900e13c00c404e99194ed53b38f566"
+          }
+        },
+        {
+          "client_id": "335574407035-l3uoav3roetgom7r876s09p1bgdi6d07.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB2KcnPJ8d-A5mui2IQfYscKzS92BuyFx4"
@@ -39,7 +93,71 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "335574407035-l3uoav3roetgom7r876s09p1bgdi6d07.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "335574407035-ee3gnvb1q38b9g7l0rniocs896pvdlqc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mycompany.tummyboxadmin"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:335574407035:android:438116176898c0d3140fde",
+        "android_client_info": {
+          "package_name": "com.mycompany.tummyboxadmin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "335574407035-c1e9qeqa1c06maok0atip9rbes9fufu7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mycompany.tummyboxadmin",
+            "certificate_hash": "3b05fdd9f2900e13c00c404e99194ed53b38f566"
+          }
+        },
+        {
+          "client_id": "335574407035-goo4edaiunh689p22o5t3860lsesmk83.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mycompany.tummyboxadmin",
+            "certificate_hash": "9bbb3186b2189ef16d8f272bdab59362c395cbb4"
+          }
+        },
+        {
+          "client_id": "335574407035-l3uoav3roetgom7r876s09p1bgdi6d07.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2KcnPJ8d-A5mui2IQfYscKzS92BuyFx4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "335574407035-l3uoav3roetgom7r876s09p1bgdi6d07.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "335574407035-ee3gnvb1q38b9g7l0rniocs896pvdlqc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mycompany.tummyboxadmin"
+              }
+            }
+          ]
         }
       }
     }

@@ -1,6 +1,5 @@
 import 'package:tb_deliveryapp/all.dart';
 
-
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -10,15 +9,26 @@ class _LoginPageState extends State<LoginPage> {
   final AuthManager _authManager = AuthManager();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
-
-  void _signIn() {
+  bool _isLoading = false;
+  void _signIn() async {
+    setState(() {
+      _isLoading =
+          true; // Set loading state to true when login button is clicked
+    });
 
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
-    _authManager.signInWithEmailAndPassword(email, password, context);
 
-    
+    try {
+      await _authManager.signInWithEmailAndPassword(email, password, context);
+    } catch (e) {
+      // Handle login error, if any
+      print("Login Error: $e");
+    } finally {
+      setState(() {
+        _isLoading = false; // Set loading state to false after login attempt
+      });
+    }
   }
 
   @override
@@ -80,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 30),
                   ElevatedButton(
-                    onPressed:  _signIn,
+                    onPressed: _isLoading ? null : _signIn,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                       padding: const EdgeInsets.symmetric(
@@ -89,12 +99,18 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child:  Text(
-                      'Login',
-                      style: TextStyle(
-                        fontSize: 18,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.orange,
+                            ),
+                          )
+                        : Text(
+                            'Login',
+                            style: TextStyle(
+                              fontSize: 18,
+                            ),
+                          ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),

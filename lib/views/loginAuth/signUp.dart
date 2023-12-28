@@ -1,9 +1,6 @@
 import 'package:tb_deliveryapp/all.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
-
-
-
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key});
 
@@ -187,14 +184,22 @@ class _SignUpPageState extends State<SignUpPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sign Up'),
-        leading: Padding(
-          padding: const EdgeInsets.all(6.0),
-          child: Image.asset(
-            'assets/TummyBox_Logo_wbg.png', // Replace with the actual path to your logo image
-            width: 40, // Adjust the width as needed
-            height: 40, // Adjust the height as needed
-          ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) => LoginPage(),
+            )); // Navigate back when back button is pressed
+          },
         ),
+        // leading: Padding(
+        //   padding: const EdgeInsets.all(6.0),
+        //   child: Image.asset(
+        //     'assets/TummyBox_Logo_wbg.png', // Replace with the actual path to your logo image
+        //     width: 40, // Adjust the width as needed
+        //     height: 40, // Adjust the height as needed
+        //   ),
+        // ),
       ),
       body: Stack(children: [
         const BackgroundWidget(),
@@ -312,7 +317,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     _buildBackIdImage(),
                     SizedBox(height: 16.0),
                     _isLoading
-                        ? CircularProgressIndicator() // Show loading indicator when isLoading is true
+                        ? Center(child: CircularProgressIndicator()) // Show loading indicator when isLoading is true
                         : ElevatedButton(
                             onPressed: () async {
                               if (_formKey.currentState!.validate()) {

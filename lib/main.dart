@@ -1,9 +1,13 @@
 import 'package:tb_deliveryapp/all.dart';
 
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+
+  await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform // Add thiis.
+      );
   await FirebaseService().initNotifications();
   runApp(MyApp());
 }
