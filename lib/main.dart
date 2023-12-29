@@ -8,6 +8,13 @@ void main() async {
   await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform // Add thiis.
       );
+//       final storageRef = FirebaseStorage.instance.ref().child("files/uid");
+// try {
+//   final listResult = await storageRef.listAll();
+// } on FirebaseException catch (e) {
+//   // Caught an exception from Firebase.
+//   print("Failed with error '${e.code}': ${e.message}");
+// }
   await FirebaseService().initNotifications();
   runApp(MyApp());
 }

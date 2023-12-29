@@ -1,4 +1,5 @@
 import 'package:tb_deliveryapp/all.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class SignUpPage extends StatefulWidget {
@@ -35,7 +36,12 @@ class _SignUpPageState extends State<SignUpPage> {
             .ref()
             .child('photo_url')
             .child(user.uid);
-        final profileImageUploadTask = profileImageRef.putFile(_profileImage!);
+
+        final profileImageUploadTask = profileImageRef.putFile(
+            _profileImage!,
+            SettableMetadata(
+              contentType: 'image/jpeg',
+            ));
         await profileImageUploadTask.whenComplete(() async {
           profileImageUrl = await profileImageRef.getDownloadURL();
         });
@@ -46,7 +52,11 @@ class _SignUpPageState extends State<SignUpPage> {
             .ref()
             .child('front_idProof')
             .child(user.uid);
-        final frontIdImageUploadTask = frontIdImageRef.putFile(_frontIdImage!);
+        final frontIdImageUploadTask = frontIdImageRef.putFile(
+            _frontIdImage!,
+            SettableMetadata(
+              contentType: 'image/jpeg',
+            ));
         await frontIdImageUploadTask.whenComplete(() async {
           frontIdImageUrl = await frontIdImageRef.getDownloadURL();
         });
@@ -57,7 +67,11 @@ class _SignUpPageState extends State<SignUpPage> {
             .ref()
             .child('back_idProof')
             .child(user.uid);
-        final backIdImageUploadTask = backIdImageRef.putFile(_backIdImage!);
+        final backIdImageUploadTask = backIdImageRef.putFile(
+            _backIdImage!,
+            SettableMetadata(
+              contentType: 'image/jpeg',
+            ));
         await backIdImageUploadTask.whenComplete(() async {
           backIdImageUrl = await backIdImageRef.getDownloadURL();
         });
@@ -69,7 +83,9 @@ class _SignUpPageState extends State<SignUpPage> {
         'userType': _userType,
         'adminApproved': "Awaiting Approval",
         'phone_number': _phoneNumber,
-
+        'photo_url': profileImageUrl,
+        'back_idProof': backIdImageUrl,
+        'front_idProof': frontIdImageUrl,
         // You can add more fields here as needed
       });
     } catch (e) {
@@ -78,36 +94,51 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Future<void> _pickProfileImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    setState(() {
-      if (pickedFile != null) {
-        _profileImage = File(pickedFile.path);
-      }
-    });
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80, // Set the image quality (adjust as needed)
+        preferredCameraDevice: CameraDevice.front,
+      );
+      setState(() {
+        if (pickedFile != null) {
+          _profileImage = File(pickedFile.path);
+        }
+      });
+    } catch (e) {
+      print("Error picking profile image: $e");
+    }
   }
 
   Future<void> _pickFrontIdImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    setState(() {
-      if (pickedFile != null) {
-        _frontIdImage = File(pickedFile.path);
-      }
-    });
+      setState(() {
+        if (pickedFile != null) {
+          _frontIdImage = File(pickedFile.path);
+        }
+      });
+    } catch (e) {
+      print("Error picking front ID image: $e");
+    }
   }
 
   Future<void> _pickBackIdImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    setState(() {
-      if (pickedFile != null) {
-        _backIdImage = File(pickedFile.path);
-      }
-    });
+      setState(() {
+        if (pickedFile != null) {
+          _backIdImage = File(pickedFile.path);
+        }
+      });
+    } catch (e) {
+      print("Error picking back ID image: $e");
+    }
   }
 
   Widget _buildFrontIdImage() {
@@ -192,23 +223,16 @@ class _SignUpPageState extends State<SignUpPage> {
             )); // Navigate back when back button is pressed
           },
         ),
-        // leading: Padding(
-        //   padding: const EdgeInsets.all(6.0),
-        //   child: Image.asset(
-        //     'assets/TummyBox_Logo_wbg.png', // Replace with the actual path to your logo image
-        //     width: 40, // Adjust the width as needed
-        //     height: 40, // Adjust the height as needed
-        //   ),
-        // ),
       ),
-      body: Stack(children: [
-        const BackgroundWidget(),
-        SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
+      body: Stack(
+        children: [
+          const BackgroundWidget(),
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     TextFormField(
@@ -317,12 +341,19 @@ class _SignUpPageState extends State<SignUpPage> {
                     _buildBackIdImage(),
                     SizedBox(height: 16.0),
                     _isLoading
-                        ? Center(child: CircularProgressIndicator()) // Show loading indicator when isLoading is true
+                        ? Center(
+                            child:
+                                CircularProgressIndicator()) // Show loading indicator when isLoading is true
                         : ElevatedButton(
                             onPressed: () async {
-                              if (_formKey.currentState!.validate()) {
-                                _formKey.currentState!.save();
-                                try {
+                              try {
+                                setState(() {
+                                  _isLoading =
+                                      true; // Set loading state to true
+                                });
+
+                                if (_formKey.currentState!.validate()) {
+                                  _formKey.currentState!.save();
                                   // Create a new user with email and password
                                   UserCredential userCredential =
                                       await FirebaseAuth.instance
@@ -345,23 +376,26 @@ class _SignUpPageState extends State<SignUpPage> {
                                       builder: (context) => LoginPage(),
                                     ));
                                   }
-                                } catch (e) {
-                                  // Handle any errors that occurred during user creation
-                                  print("Error: $e");
-                                } finally {
-                                  setState(() {
-                                    _isLoading =
-                                        false; // Set loading state to false
-                                  });
                                 }
+                              } catch (e) {
+                                // Handle any errors that occurred during user creation
+                                print("Error: $e");
+                              } finally {
+                                setState(() {
+                                  _isLoading =
+                                      false; // Set loading state to false
+                                });
                               }
                             },
-                            child: Text('Sign Up')),
-                  ]),
+                            child: Text('Sign Up'),
+                          ),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }

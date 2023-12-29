@@ -47,10 +47,10 @@
               "client_type": 3
             },
             {
-              "client_id": "335574407035-ee3gnvb1q38b9g7l0rniocs896pvdlqc.apps.googleusercontent.com",
+              "client_id": "335574407035-1n9fr3ehai6capikrl7cj4torkv7400l.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.mycompany.tummyboxadmin"
+                "bundle_id": "com.example.tbDeliveryapp"
               }
             }
           ]
@@ -99,10 +99,10 @@
               "client_type": 3
             },
             {
-              "client_id": "335574407035-ee3gnvb1q38b9g7l0rniocs896pvdlqc.apps.googleusercontent.com",
+              "client_id": "335574407035-1n9fr3ehai6capikrl7cj4torkv7400l.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.mycompany.tummyboxadmin"
+                "bundle_id": "com.example.tbDeliveryapp"
               }
             }
           ]
@@ -151,10 +151,10 @@
               "client_type": 3
             },
             {
-              "client_id": "335574407035-ee3gnvb1q38b9g7l0rniocs896pvdlqc.apps.googleusercontent.com",
+              "client_id": "335574407035-1n9fr3ehai6capikrl7cj4torkv7400l.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.mycompany.tummyboxadmin"
+                "bundle_id": "com.example.tbDeliveryapp"
               }
             }
           ]

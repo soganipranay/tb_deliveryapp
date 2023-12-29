@@ -36,14 +36,24 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
         appBar: AppBar(
           title: const Text('Tummy Box Partner App'),
-          leading: Padding(
-            padding: const EdgeInsets.all(6.0),
-            child: Image.asset(
-              'assets/TummyBox_Logo_wbg.png', // Replace with the actual path to your logo image
-              width: 40, // Adjust the width as needed
-              height: 40, // Adjust the height as needed
-            ),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.of(context).pushReplacement(MaterialPageRoute(
+                builder: (context) => LoginPage(),
+              )); // Navigate back when back button is pressed
+            },
           ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Image.asset(
+                'assets/TummyBox_Logo_wbg.png', // Replace with the actual path to your logo image
+                width: 40, // Adjust the width as needed
+                height: 40, // Adjust the height as needed
+              ),
+            ),
+          ],
         ),
         body: Stack(children: [
           const BackgroundWidget(),

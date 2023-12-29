@@ -1,8 +1,6 @@
 import 'dart:developer';
 import 'package:tb_deliveryapp/all.dart';
 
-
-
 class PackedQRView extends StatefulWidget {
   final List<Map<String, dynamic>> pendingOrdersList; // Add this field
 
@@ -96,109 +94,116 @@ class _PackedQRViewState extends State<PackedQRView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Packaging'),
-        leading: Padding(
-          padding: const EdgeInsets.all(6.0),
-          child: Image.asset(
-            'assets/TummyBox_Logo_wbg.png', // Replace with the actual path to your logo image
-            width: 40, // Adjust the width as needed
-            height: 40, // Adjust the height as needed
-          ),
-        ),
-      ),
-      body: Column(
-        children: <Widget>[
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.4,
-            child: _buildQrView(context),
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-          Expanded(
-            child: scannedOrderDetails.isNotEmpty
-                ? ListView.builder(
-                    itemCount: scannedOrderDetails.length,
-                    itemBuilder: (context, index) {
-                      final orderItem = scannedOrderDetails[index];
-                      bool isPacked = orderItem['orderStatus'] == 'Packed';
-
-                      return ListTile(
-                        title: Text("Order Name: ${orderItem['orderName']}"),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Quantity: ${orderItem['quantity']}"),
-                            Text("Order Type: ${orderItem['orderType']}"),
-                            const Divider(),
-                          ],
-                        ),
-                        trailing: isPacked
-                            ? Icon(
-                                Icons.circle,
-                                color: Colors.green,
-                              )
-                            : null, // Display green dot if packed, null otherwise
-                      );
-                    },
-                  )
-                : const Text('Scan a code'),
-          ),
-          Container(
-            margin: const EdgeInsets.all(8),
-            child: ElevatedButton(
-              onPressed: result != null && scannedOrderDetails.isNotEmpty
-                  ? () async {
-                      await controller?.pauseCamera();
-                      result = null;
-                      for (var orderItem in scannedOrderDetails) {
-                        if (orderItem['orderStatus'] == 'Pending') {
-                          await firebaseService.updateOrderStatus(
-                              orderItem['orderRef'], 'Packed');
-                          // Update the order status in the local list
-                          orderItem['orderStatus'] = 'Packed';
-                          print("Packed: ${orderItem['orderRef']}");
-                        } else {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text('Order already packed'),
-                                content: Text(orderItem['orderRef']),
-                                actions: <Widget>[
-                                  ElevatedButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.orange,
-                                    ),
-                                    child: const Text('Ok'),
-                                  )
-                                ],
-                              );
-                            },
-                          );
-                        }
-                      }
-                      await controller?.resumeCamera();
-                      setState(
-                          () {}); // Refresh the UI to reflect the updated status
-                    }
-                  : () {},
-              style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                minimumSize: const Size(100, 40),
-                textStyle: const TextStyle(fontSize: 14),
+    return PopScope(
+        canPop: true,
+        onPopInvoked: (bool didPop) {
+          // Perform any additional logic here if needed
+          controller?.dispose(); // Dispose the QR scanner controller
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Packaging'),
+            leading: Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Image.asset(
+                'assets/TummyBox_Logo_wbg.png', // Replace with the actual path to your logo image
+                width: 40, // Adjust the width as needed
+                height: 40, // Adjust the height as needed
               ),
-              child: const Text('Packed', style: TextStyle(fontSize: 10)),
             ),
           ),
-        ],
-      ),
-    );
+          body: Column(
+            children: <Widget>[
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.4,
+                child: _buildQrView(context),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              Expanded(
+                child: scannedOrderDetails.isNotEmpty
+                    ? ListView.builder(
+                        itemCount: scannedOrderDetails.length,
+                        itemBuilder: (context, index) {
+                          final orderItem = scannedOrderDetails[index];
+                          bool isPacked = orderItem['orderStatus'] == 'Packed';
+
+                          return ListTile(
+                            title:
+                                Text("Order Name: ${orderItem['orderName']}"),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Quantity: ${orderItem['quantity']}"),
+                                Text("Order Type: ${orderItem['orderType']}"),
+                                const Divider(),
+                              ],
+                            ),
+                            trailing: isPacked
+                                ? Icon(
+                                    Icons.circle,
+                                    color: Colors.green,
+                                  )
+                                : null, // Display green dot if packed, null otherwise
+                          );
+                        },
+                      )
+                    : const Text('Scan a code'),
+              ),
+              Container(
+                margin: const EdgeInsets.all(8),
+                child: ElevatedButton(
+                  onPressed: result != null && scannedOrderDetails.isNotEmpty
+                      ? () async {
+                          await controller?.pauseCamera();
+                          result = null;
+                          for (var orderItem in scannedOrderDetails) {
+                            if (orderItem['orderStatus'] == 'Pending') {
+                              await firebaseService.updateOrderStatus(
+                                  orderItem['orderRef'], 'Packed');
+                              // Update the order status in the local list
+                              orderItem['orderStatus'] = 'Packed';
+                              print("Packed: ${orderItem['orderRef']}");
+                            } else {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Order already packed'),
+                                    content: Text(orderItem['orderRef']),
+                                    actions: <Widget>[
+                                      ElevatedButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.orange,
+                                        ),
+                                        child: const Text('Ok'),
+                                      )
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+                          }
+                          await controller?.resumeCamera();
+                          setState(
+                              () {}); // Refresh the UI to reflect the updated status
+                        }
+                      : () {},
+                  style: ElevatedButton.styleFrom(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    minimumSize: const Size(100, 40),
+                    textStyle: const TextStyle(fontSize: 14),
+                  ),
+                  child: const Text('Packed', style: TextStyle(fontSize: 10)),
+                ),
+              ),
+            ],
+          ),
+        ));
   }
 
   Widget _buildQrView(BuildContext context) {
