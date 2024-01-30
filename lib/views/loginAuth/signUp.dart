@@ -348,13 +348,26 @@ class _SignUpPageState extends State<SignUpPage> {
                             onPressed: () async {
                               try {
                                 setState(() {
-                                  _isLoading =
-                                      true; // Set loading state to true
+                                  _isLoading = true;
                                 });
+
+                                // Check if profile images are not uploaded
+                                if (_profileImage == null ||
+                                    _frontIdImage == null ||
+                                    _backIdImage == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'Please upload all required images.'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  return;
+                                }
 
                                 if (_formKey.currentState!.validate()) {
                                   _formKey.currentState!.save();
-                                  // Create a new user with email and password
+
                                   UserCredential userCredential =
                                       await FirebaseAuth.instance
                                           .createUserWithEmailAndPassword(
@@ -362,28 +375,22 @@ class _SignUpPageState extends State<SignUpPage> {
                                     password: _password!,
                                   );
 
-                                  // Check if the user is created successfully
                                   if (userCredential.user != null) {
-                                    // User creation was successful
-                                    // Add additional user data to Firestore
                                     await _addUserDataToFirestore(
                                         userCredential.user!);
 
-                                    // Navigate to the next screen or perform any desired action
-                                    // For example:
-                                    Navigator.of(context)
-                                        .pushReplacement(MaterialPageRoute(
-                                      builder: (context) => LoginPage(),
-                                    ));
+                                    Navigator.of(context).pushReplacement(
+                                      MaterialPageRoute(
+                                        builder: (context) => LoginPage(),
+                                      ),
+                                    );
                                   }
                                 }
                               } catch (e) {
-                                // Handle any errors that occurred during user creation
                                 print("Error: $e");
                               } finally {
                                 setState(() {
-                                  _isLoading =
-                                      false; // Set loading state to false
+                                  _isLoading = false;
                                 });
                               }
                             },
