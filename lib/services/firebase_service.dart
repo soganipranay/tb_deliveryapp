@@ -47,6 +47,7 @@ class FirebaseService {
         final data = documentSnapshot.data();
         return {
           'orderRef': documentSnapshot.reference.id,
+          'userID': data['userID'],
           'orderName': data['orderName'],
           'quantity': data['quantity'],
           'orderType': data['orderType'],
@@ -94,6 +95,7 @@ class FirebaseService {
         final data = documentSnapshot.data();
         return {
           'orderRef': documentSnapshot.reference.id,
+          'userID': data['userID'],
           'orderName': data['orderName'],
           'quantity': data['quantity'],
           'orderType': data['orderType'],
@@ -196,12 +198,35 @@ class FirebaseService {
           .where('userType', isEqualTo: "Delivery Partner")
           .get();
 
+      print("querySnapshot.docs: ${querySnapshot.docs}");
       if (querySnapshot.docs.isNotEmpty) {
         DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
+        print("querySnapshot.docs: ${documentSnapshot['adminApproved']}");
+
         if (documentSnapshot['adminApproved'] == "Approved") {
           final partnerType = documentSnapshot['userType'];
-          getPartnerDetails.add([partnerType, documentSnapshot.id]);
+          getPartnerDetails.add([partnerType, documentSnapshot.reference.id]);
           return getPartnerDetails; // Return the document id
+        } else if (documentSnapshot['adminApproved'] == "Rejected") {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Approval Rejected'),
+                content: const Text(
+                    'Your account has been rejected for approval. Please contact the admin for further assistance.'),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text('OK'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+          return null;
         } else {
           showDialog(
             context: context,
@@ -246,9 +271,10 @@ class FirebaseService {
       if (querySnapshot.docs.isNotEmpty) {
         // Assuming that userEmail is unique and only one document will match
         DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
+        print("documentSnapshot.data():{documentSnapshot.data()}");
         if (documentSnapshot['adminApproved'] == "Approved") {
           final partnerType = documentSnapshot['userType'];
-          getPartnerDetails.add([partnerType, documentSnapshot.id]);
+          getPartnerDetails.add([partnerType, documentSnapshot.reference.id]);
           return getPartnerDetails; // Return the document id
         } else {
           // Show a dialog since the user is not approved
@@ -403,5 +429,38 @@ class FirebaseService {
     print('fCMToken : $fCMToken');
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
   }
-  
+
+  Future<void> uploadNotificationDocument(
+    String userRef,
+    String senderRef,
+  ) async {
+    try {
+      // Reference to the ff_user_push_notifications collection
+      CollectionReference notifications =
+          FirebaseFirestore.instance.collection('ff_user_push_notifications');
+
+      // Details for the new document
+      Map<String, dynamic> notificationDetails = {
+        'initial_page_name': 'HomePage',
+        'notification_sound': 'default',
+        'notification_text':
+            'We are sad to see you go :(. We are improving every day, hope to serve you again!',
+        'notification_title': 'Subscription Cancellation',
+        'notification_image_url': 'https://firebasestorage.googleapis.com/v0/b/tummybox-f2238.appspot.com/o/FCMImages%2F6550850.png?alt=media&token=d2e2763f-219c-4161-84fd-8b9c69fa7f2f',
+        'num_sent': '',
+        'parameter_data': '{}',
+        'sender': "/Users/$senderRef",
+        'status': '',
+        'timestamp': Timestamp.fromDate(DateTime.now()),
+        'user_refs': "/Users/${userRef}",
+      };
+
+      // Add a new document with a unique ID
+      await notifications.add(notificationDetails);
+
+      print('Notification document uploaded successfully.');
+    } catch (e) {
+      print('Error uploading notification document: $e');
+    }
+  }
 }

@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:intl/intl.dart';
 import 'package:tb_deliveryapp/all.dart';
+import 'package:tb_deliveryapp/main.dart';
 
 class DeliveredQRView extends StatefulWidget {
   final List<Map<String, dynamic>> packedOrdersList; // Add this field
@@ -167,6 +168,7 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                       await controller?.pauseCamera();
                       result = null;
                       for (var orderItem in scannedOrderDetails) {
+                        print("orderItem: $orderItem");
                         if (orderItem['orderStatus'] == 'Packed') {
                           await firebaseService.updateOrderStatus(
                               orderItem['orderRef'], 'Delivered');
@@ -177,7 +179,18 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                               orderItem['pid'],
                               orderItem['quantity'],
                               orderItem['deliveryDate']);
-                          print("Delivered: ${orderItem['orderRef']}");
+                          print(
+                              "Delivered: ${orderItem['orderRef']}, ${DateTime.now()}");
+                          print(
+                              "Delivered: ${orderItem['userID']}, ${DateTime.now()}");
+
+                          try {
+                            await firebaseService.uploadNotificationDocument(
+                                orderItem['userID'], orderItem['userID']);
+                            print("message sent");
+                          } catch (e) {
+                            print("Error marking order as delivered: $e");
+                          }
                         } else {
                           showDialog(
                             context: context,
@@ -276,6 +289,7 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
         'deliveryDate': deliveryDate,
         'userTiffinCount': userTiffinCount
       };
+
       print(tiffinData);
       await tiffinsCollection.add(tiffinData);
     } catch (e) {

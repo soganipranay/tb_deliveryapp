@@ -1,7 +1,6 @@
 import 'package:tb_deliveryapp/all.dart';
 
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 

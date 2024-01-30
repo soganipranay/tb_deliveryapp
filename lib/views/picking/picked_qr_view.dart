@@ -314,7 +314,7 @@ class _PickedQRViewState extends State<PickedQRView> {
         print(userTiffinCount);
         if (querySnapshot.docs.isNotEmpty) {
           for (var doc in querySnapshot.docs) {
-            await tiffinsCollection.doc(doc.id).update({
+            await tiffinsCollection.doc(doc.reference.id).update({
               'status': 'Picked', // Update the status to "Picked"
               'userTiffinCount': userTiffinCount
             });
