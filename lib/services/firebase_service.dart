@@ -93,6 +93,7 @@ class FirebaseService {
 
       final ordersList = querySnapshot.docs.map((documentSnapshot) {
         final data = documentSnapshot.data();
+        print("data $data");
         return {
           'orderRef': documentSnapshot.reference.id,
           'userID': data['userID'],
@@ -446,7 +447,8 @@ class FirebaseService {
         'notification_text':
             'We are sad to see you go :(. We are improving every day, hope to serve you again!',
         'notification_title': 'Subscription Cancellation',
-        'notification_image_url': 'https://firebasestorage.googleapis.com/v0/b/tummybox-f2238.appspot.com/o/FCMImages%2F6550850.png?alt=media&token=d2e2763f-219c-4161-84fd-8b9c69fa7f2f',
+        'notification_image_url':
+            'https://firebasestorage.googleapis.com/v0/b/tummybox-f2238.appspot.com/o/FCMImages%2F6550850.png?alt=media&token=d2e2763f-219c-4161-84fd-8b9c69fa7f2f',
         'num_sent': '',
         'parameter_data': '{}',
         'sender': "/Users/$senderRef",

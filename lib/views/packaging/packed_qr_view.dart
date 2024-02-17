@@ -29,44 +29,37 @@ class _PackedQRViewState extends State<PackedQRView> {
       });
 
       // Check if the scanned QR code exists in the pendingOrdersList
-      bool found = false;
-      Map<String, dynamic>? orderDetails;
+      List<Map<String, dynamic>> matchingOrders = [];
       print(widget.pendingOrdersList);
+
       for (var orderItem in widget.pendingOrdersList) {
         if (orderItem['pid'] == result!.code.toString()) {
-          found = true;
-          orderDetails = orderItem;
-          break;
+          matchingOrders.add(orderItem);
         }
       }
 
-      if (found) {
+      if (matchingOrders.isNotEmpty) {
         // Handle the case when the QR code is found in pendingOrdersList
         print("QR Code found in pendingOrdersList: ${result!.code.toString()}");
         setState(() {
           scannedOrderDetails.clear();
-          scannedOrderDetails.add(orderDetails!);
+          scannedOrderDetails.addAll(matchingOrders);
         });
 
         // Check if all orders are packed and the pending order list is empty
-        bool allPacked = true;
-        for (var orderItem in scannedOrderDetails) {
-          if (orderItem['orderStatus'] != 'Packed') {
-            allPacked = false;
-            break;
-          }
-        }
+        bool allPacked = scannedOrderDetails
+            .every((orderItem) => orderItem['orderStatus'] == 'Packed');
+
         if (allPacked && widget.pendingOrdersList.isEmpty) {
           // Prepare a list of orders to update in Firestore
-          List<Map<String, dynamic>> ordersToUpdate = [];
-          for (var orderItem in scannedOrderDetails) {
-            if (orderItem['orderStatus'] == 'Packed') {
-              ordersToUpdate.add({
-                'orderRef': orderItem['orderRef'],
-                'orderStatus': 'Packed',
-              });
-            }
-          }
+          List<Map<String, dynamic>> ordersToUpdate = scannedOrderDetails
+              .where((orderItem) => orderItem['orderStatus'] == 'Packed')
+              .map((orderItem) => {
+                    'orderRef': orderItem['orderRef'],
+                    'orderStatus': 'Packed',
+                  })
+              .toList();
+
           // Update the Firestore collection with packed orders
           await firebaseService.updateOrdersInFirestore(ordersToUpdate);
           print("Orders updated in Firestore");
