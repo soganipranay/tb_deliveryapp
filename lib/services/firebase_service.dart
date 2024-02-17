@@ -53,6 +53,8 @@ class FirebaseService {
           'orderType': data['orderType'],
           'orderStatus': data['Status'],
           'orderLocation': data['location'],
+          'profileName': data['profileName'],
+          'packaging': data['packaging'],
           'pid': data['pid'],
           'deliveryDate': data['deliveryDate']
         };
@@ -102,6 +104,8 @@ class FirebaseService {
           'orderType': data['orderType'],
           'orderStatus': data['Status'],
           'orderLocation': data['location'],
+          'profileName': data['profileName'],
+          'packaging': data['packaging'],
           'pid': data['pid'],
           'deliveryDate': data['deliveryDate']
         };

@@ -130,6 +130,9 @@ class _PackedQRViewState extends State<PackedQRView> {
                               children: [
                                 Text("Quantity: ${orderItem['quantity']}"),
                                 Text("Order Type: ${orderItem['orderType']}"),
+                                Text("Packaging Type: ${orderItem['packaging']}"),
+                                Text("Profile Name: ${orderItem['profileName']}"),
+
                                 const Divider(),
                               ],
                             ),

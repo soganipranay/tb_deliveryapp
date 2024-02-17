@@ -78,6 +78,28 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
                                       ))); // Pass locationNames
                           // Handle tap event if needed
                         },
+                         trailing: PopupMenuButton<String>(
+                          icon: Icon(Icons.more_vert),
+                          itemBuilder: (BuildContext context) => [
+                            PopupMenuItem<String>(
+                              value: 'Location',
+                              child: GestureDetector(
+                                onTap: () {
+                                  // Handle link opening here
+                                  print('Open Location Link Clicked');
+                                  // Replace 'YOUR_LINK_HERE' with the actual link you want to open
+                                  launchUrl('https://www.google.com/search?q=wtp+location+jaipur&oq=wtp+locaation+&gs_lcrp=EgZjaHJvbWUqCQgBEAAYDRiABDIGCAAQRRg5MgkIARAAGA0YgAQyCAgCEAAYFhgeMggIAxAAGBYYHjIICAQQABgWGB4yDQgFEAAYhgMYgAQYigUyDQgGEAAYhgMYgAQYigXSAQg2OTYyajBqN6gCALACAA&sourceid=chrome&ie=UTF-8&lqi=ChN3dHAgbG9jYXRpb24gamFpcHVySPSvxMztqoCACFoZEAAYACITd3RwIGxvY2F0aW9uIGphaXB1cpIBD3Nob3BwaW5nX2NlbnRlcpoBJENoZERTVWhOTUc5blMwVkpRMEZuU1VSemNVbDFSRGxuUlJBQqoBRBABKgciA3d0cCgAMh4QASIahS40xo7-cDhN57Qu7Gcv_Soh6_gw4Gb4uAEyFxACIhN3dHAgbG9jYXRpb24gamFpcHVy#rlimm=4847010798830747055' as Uri);
+                                },
+                                child: Text('Open Location'),
+                              ),
+                            ),
+                            // Add more options as needed
+                          ],
+                          onSelected: (String value) {
+                            // Handle the selected option
+                            print('Selected: $value');
+                          },
+                        ),
                       );
                     }).toList() ??
                     [],

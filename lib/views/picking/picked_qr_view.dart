@@ -137,6 +137,8 @@ class _PickedQRViewState extends State<PickedQRView> {
                     children: [
                       Text("Quantity: ${orderItem['quantity']}"),
                       Text("Order Type: ${orderItem['orderType']}"),
+                      Text("Packaging Type: ${orderItem['packaging']}"),
+                      Text("Profile Name: ${orderItem['profileName']}"),
                       const Divider(),
                     ],
                   ),
@@ -277,8 +279,7 @@ class _PickedQRViewState extends State<PickedQRView> {
             ElevatedButton(
               onPressed: () async {
                 if (receivedQuantity <= orderDetails['quantity']) {
-                  userTiffinCount =
-                      orderDetails['quantity'] - receivedQuantity;
+                  userTiffinCount = orderDetails['quantity'] - receivedQuantity;
                   Navigator.of(context).pop();
                 }
               },
