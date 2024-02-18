@@ -1,6 +1,5 @@
 import 'package:tb_deliveryapp/all.dart';
 
-
 class CountPackedOrders extends StatefulWidget {
   final String meal;
   final List<String>? locationNames;
@@ -78,7 +77,7 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
                                       ))); // Pass locationNames
                           // Handle tap event if needed
                         },
-                         trailing: PopupMenuButton<String>(
+                        trailing: PopupMenuButton<String>(
                           icon: Icon(Icons.more_vert),
                           itemBuilder: (BuildContext context) => [
                             PopupMenuItem<String>(
@@ -87,8 +86,8 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
                                 onTap: () {
                                   // Handle link opening here
                                   print('Open Location Link Clicked');
-                                  // Replace 'YOUR_LINK_HERE' with the actual link you want to open
-                                  launchUrl('https://www.google.com/search?q=wtp+location+jaipur&oq=wtp+locaation+&gs_lcrp=EgZjaHJvbWUqCQgBEAAYDRiABDIGCAAQRRg5MgkIARAAGA0YgAQyCAgCEAAYFhgeMggIAxAAGBYYHjIICAQQABgWGB4yDQgFEAAYhgMYgAQYigUyDQgGEAAYhgMYgAQYigXSAQg2OTYyajBqN6gCALACAA&sourceid=chrome&ie=UTF-8&lqi=ChN3dHAgbG9jYXRpb24gamFpcHVySPSvxMztqoCACFoZEAAYACITd3RwIGxvY2F0aW9uIGphaXB1cpIBD3Nob3BwaW5nX2NlbnRlcpoBJENoZERTVWhOTUc5blMwVkpRMEZuU1VSemNVbDFSRGxuUlJBQqoBRBABKgciA3d0cCgAMh4QASIahS40xo7-cDhN57Qu7Gcv_Soh6_gw4Gb4uAEyFxACIhN3dHAgbG9jYXRpb24gamFpcHVy#rlimm=4847010798830747055' as Uri);
+                                  // Use 'launch' directly with the URL string
+                                  _launchUrl;
                                 },
                                 child: Text('Open Location'),
                               ),
@@ -106,6 +105,13 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
               ),
             ),
     );
+  }
+
+  final Uri _url = Uri.parse('https://www.google.com/search?q=wtp+location+jaipur&oq=wtp+locaation+&gs_lcrp=EgZjaHJvbWUqCQgBEAAYDRiABDIGCAAQRRg5MgkIARAAGA0YgAQyCAgCEAAYFhgeMggIAxAAGBYYHjIICAQQABgWGB4yDQgFEAAYhgMYgAQYigUyDQgGEAAYhgMYgAQYigXSAQg2OTYyajBqN6gCALACAA&sourceid=chrome&ie=UTF-8&lqi=ChN3dHAgbG9jYXRpb24gamFpcHVySPSvxMztqoCACFoZEAAYACITd3RwIGxvY2F0aW9uIGphaXB1cpIBD3Nob3BwaW5nX2NlbnRlcpoBJENoZERTVWhOTUc5blMwVkpRMEZuU1VSemNVbDFSRGxuUlJBQqoBRBABKgciA3d0cCgAMh4QASIahS40xo7-cDhN57Qu7Gcv_Soh6_gw4Gb4uAEyFxACIhN3dHAgbG9jYXRpb24gamFpcHVy#rlimm=4847010798830747055');
+  Future<void> _launchUrl() async {
+    if (!await launchUrl(_url)) {
+      throw Exception('Could not launch $_url');
+    }
   }
 
   Future<void> countPackedOrders() async {
