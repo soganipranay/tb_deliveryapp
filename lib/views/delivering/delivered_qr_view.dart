@@ -175,11 +175,15 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                               orderItem['orderRef'], 'Delivered');
                           // Update the order status in the local list
                           orderItem['orderStatus'] = 'Delivered';
-                          markTiffinAsDelivered(
-                              orderItem['orderRef'],
-                              orderItem['pid'],
-                              orderItem['quantity'],
-                              orderItem['deliveryDate']);
+                          if (orderItem['packaging'] == "Disposable") {
+                            print("not available");
+                          } else {
+                            markTiffinAsDelivered(
+                                orderItem['orderRef'],
+                                orderItem['pid'],
+                                orderItem['quantity'],
+                                orderItem['deliveryDate']);
+                          }
                           print(
                               "Delivered: ${orderItem['orderRef']}, ${DateTime.now()}");
                           print(
@@ -291,7 +295,7 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
         'userTiffinCount': userTiffinCount
       };
 
-      print(tiffinData);
+      print("tiffinData, $tiffinData");
       await tiffinsCollection.add(tiffinData);
     } catch (e) {
       print("Error marking order as delivered: $e");

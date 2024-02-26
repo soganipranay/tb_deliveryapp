@@ -172,11 +172,15 @@ class _PickedQRViewState extends State<PickedQRView> {
                           await firebaseService.updateOrderStatus(
                               orderItem['orderRef'], 'Picked');
                           orderItem['orderStatus'] = 'Picked';
-                          markTiffinAsPicked(
-                              orderItem['orderRef'],
-                              orderItem['pid'],
-                              userTiffinCount,
-                              orderItem['quantity']);
+                          if (orderItem['packaging'] == "Disposable") {
+                            print("not available");
+                          } else {
+                            markTiffinAsPicked(
+                                orderItem['orderRef'],
+                                orderItem['pid'],
+                                userTiffinCount,
+                                orderItem['quantity']);
+                          }
                           print("Delivered: ${orderItem['orderRef']}");
                         } else {
                           // ignore: use_build_context_synchronously
