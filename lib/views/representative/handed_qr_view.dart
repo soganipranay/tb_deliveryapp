@@ -132,6 +132,8 @@ class _HandlingQRViewState extends State<HandlingQRView> {
                           children: [
                             Text("Quantity: ${orderItem['quantity']}"),
                             Text("Order Type: ${orderItem['orderType']}"),
+                            Text("Packaging: ${orderItem['packaging']}"),
+
                             const Divider(),
                           ],
                         ),

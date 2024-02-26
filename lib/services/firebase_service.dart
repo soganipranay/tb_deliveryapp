@@ -54,7 +54,8 @@ class FirebaseService {
           'orderStatus': data['Status'],
           'orderLocation': data['location'],
           'pid': data['pid'],
-          'deliveryDate': data['deliveryDate']
+          'deliveryDate': data['deliveryDate'],
+          'packaging': data['packaging']
         };
       }).toList();
       print(ordersList);
@@ -102,7 +103,9 @@ class FirebaseService {
           'orderStatus': data['Status'],
           'orderLocation': data['location'],
           'pid': data['pid'],
-          'deliveryDate': data['deliveryDate']
+          'deliveryDate': data['deliveryDate'],
+          'packaging': data['packaging']
+
         };
       }).toList();
       print(ordersList);

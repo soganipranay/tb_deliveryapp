@@ -146,6 +146,7 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                           children: [
                             Text("Quantity: ${orderItem['quantity']}"),
                             Text("Order Type: ${orderItem['orderType']}"),
+                            Text("Packaging: ${orderItem['packaging']}"),
                             const Divider(),
                           ],
                         ),
