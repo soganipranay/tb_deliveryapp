@@ -56,7 +56,8 @@ class FirebaseService {
           'profileName': data['profileName'],
           'packaging': data['packaging'],
           'pid': data['pid'],
-          'deliveryDate': data['deliveryDate']
+          'deliveryDate': data['deliveryDate'],
+          'locationType': data['locationType'],
         };
       }).toList();
       print(ordersList);
@@ -107,7 +108,8 @@ class FirebaseService {
           'profileName': data['profileName'],
           'packaging': data['packaging'],
           'pid': data['pid'],
-          'deliveryDate': data['deliveryDate']
+          'deliveryDate': data['deliveryDate'],
+          'locationType': data['locationType'],
         };
       }).toList();
       print(ordersList);
