@@ -60,7 +60,7 @@ class _RepresentativeOrdersState extends State<RepresentativeOrders> {
                 return ListTile(
                   title: Text(locationName),
                   subtitle: Text(
-                    "Handling: $deliveredOrders, Delivered: $handedOrders",
+                    "Handling: $handedOrders, Delivered: $deliveredOrders",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.green,
