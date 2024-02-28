@@ -53,9 +53,9 @@ class _RepresentativeOrdersState extends State<RepresentativeOrders> {
         child: Column(
           children: locationNames?.map((locationName) {
                 final int deliveredOrders =
-                    locationHandlingOrders[locationName] ?? 0;
-                final int handedOrders =
                     locationDeliveredOrders[locationName] ?? 0;
+                final int handedOrders =
+                    locationHandlingOrders[locationName] ?? 0;
 
                 return ListTile(
                   title: Text(locationName),
@@ -86,15 +86,15 @@ class _RepresentativeOrdersState extends State<RepresentativeOrders> {
     for (String location in widget.locationNames ?? []) {
       // Fetch the total handed orders for the current location
       final Map<String, dynamic> handedOrders = await firebaseService
-          .fetchOrderByOrderStatus('Delivered', location, widget.meal);
-      final int totalDeliveredOrders = handedOrders['totalOrders'];
+          .fetchOrderByOrderStatus('Handed', location, widget.meal);
+      final int totalHandlingOrders = handedOrders['totalOrders'];
       final List<Map<String, dynamic>> handedOrdersData = handedOrders[
           'ordersList']; // Use a different variable name to avoid conflict
 
       // Fetch the total delivered orders for the current location
       final Map<String, dynamic> deliveredOrders = await firebaseService
-          .fetchOrderByOrderStatus('Handling', location, widget.meal);
-      final int totalHandlingOrders = deliveredOrders['totalOrders'];
+          .fetchOrderByOrderStatus('Delivered', location, widget.meal);
+      final int totalDeliveredOrders  = deliveredOrders['totalOrders'];
       final List<Map<String, dynamic>> deliveredOrdersData = deliveredOrders[
           'ordersList']; // Use a different variable name to avoid conflict
 

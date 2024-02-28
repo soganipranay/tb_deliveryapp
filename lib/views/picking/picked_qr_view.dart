@@ -161,7 +161,7 @@ class _PickedQRViewState extends State<PickedQRView> {
                       result = null;
                       for (var orderItem in scannedOrderDetails) {
                         if (orderItem['orderStatus'] == 'Delivered') {
-                          print("orderItem $orderItem");
+                          print("orderItem $orderItem"); 
                           if (orderItem['quantity'] > 1) {
                             // Show the quantity input dialog
                             await _showQuantityDialog(context, orderItem);

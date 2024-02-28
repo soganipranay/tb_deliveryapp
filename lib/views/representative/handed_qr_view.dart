@@ -156,12 +156,12 @@ class _HandlingQRViewState extends State<HandlingQRView> {
                       await controller?.pauseCamera();
                       result = null;
                       for (var orderItem in scannedOrderDetails) {
-                        if (orderItem['orderStatus'] == 'Delivered') {
+                        if (orderItem['orderStatus'] == 'Handed') {
                           await firebaseService.updateOrderStatus(
-                              orderItem['orderRef'], 'Handed');
+                              orderItem['orderRef'], 'Delivered');
                           // Update the order status in the local list
-                          orderItem['orderStatus'] = 'Handed';
-                          print("Handed: ${orderItem['orderRef']}");
+                          orderItem['orderStatus'] = 'Delivered';
+                          print("Delivered: ${orderItem['orderRef']}");
                         } else {
                           showDialog(
                             context: context,

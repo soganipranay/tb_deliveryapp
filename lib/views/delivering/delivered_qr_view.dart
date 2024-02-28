@@ -170,7 +170,7 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                       result = null;
                       for (var orderItem in scannedOrderDetails) {
                         print("orderItem: $orderItem");
-                        if (orderItem['orderStatus'] == 'Packed') {
+                        if (orderItem['orderStatus'] == 'Packed' && orderItem['locationType'] != 'School') {
                           await firebaseService.updateOrderStatus(
                               orderItem['orderRef'], 'Delivered');
                           // Update the order status in the local list
@@ -178,6 +178,8 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                           if (orderItem['packaging'] == "Disposable") {
                             print("not available");
                           } else {
+                            print("hello1");
+
                             markTiffinAsDelivered(
                                 orderItem['orderRef'],
                                 orderItem['pid'],
@@ -196,7 +198,36 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                           } catch (e) {
                             print("Error marking order as delivered: $e");
                           }
-                        } else {
+                        } else if (orderItem['orderStatus'] == 'Packed' &&
+                            orderItem['locationType'] == 'School'){
+                            await firebaseService.updateOrderStatus(
+                              orderItem['orderRef'], 'Handed');
+                          // Update the order status in the local list
+                          orderItem['orderStatus'] = 'Handed';
+                          if (orderItem['packaging'] == "Disposable") {
+                            print("not available");
+                          } else {
+                            print("hello");
+                            markTiffinAsDelivered(
+                                orderItem['orderRef'],
+                                orderItem['pid'],
+                                orderItem['quantity'],
+                                orderItem['deliveryDate']);
+                          }
+                          print(
+                              "Handed: ${orderItem['orderRef']}, ${DateTime.now()}");
+                          print(
+                              "Handed: ${orderItem['userID']}, ${DateTime.now()}");
+
+                          try {
+                            await firebaseService.uploadNotificationDocument(
+                                orderItem['userID'], orderItem['userID']);
+                            print("message sent");
+                          } catch (e) {
+                            print("Error marking order as delivered: $e");
+                          }   
+                        } 
+                        else {
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
