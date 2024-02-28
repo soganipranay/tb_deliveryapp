@@ -185,6 +185,7 @@ class _HomeViewState extends State<HomeView> {
                                 builder: (context) => ProcessView(
                                   meal: "Breakfast",
                                   locations: deliveryPartnerLocations,
+                                  partnerType: retainedPartnertype,
                                 ),
                               ),
                             );
@@ -199,6 +200,8 @@ class _HomeViewState extends State<HomeView> {
                                 builder: (context) => ProcessView(
                                   meal: "Lunch",
                                   locations: deliveryPartnerLocations,
+                                  partnerType: retainedPartnertype,
+
                                 ),
                               ),
                             );
@@ -213,6 +216,8 @@ class _HomeViewState extends State<HomeView> {
                                 builder: (context) => ProcessView(
                                   meal: "Dinner",
                                   locations: deliveryPartnerLocations,
+                                  partnerType: retainedPartnertype,
+
                                 ),
                               ),
                             );

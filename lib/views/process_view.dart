@@ -1,9 +1,14 @@
 import 'package:tb_deliveryapp/all.dart';
 
 class ProcessView extends StatefulWidget {
-  const ProcessView({Key? key, required this.meal, required this.locations})
+  const ProcessView(
+      {Key? key,
+      required this.meal,
+      required this.locations,
+      required this.partnerType})
       : super(key: key);
   final String meal;
+  final String partnerType;
   final List<dynamic>? locations;
   @override
   State<ProcessView> createState() => _ProcessViewState();
@@ -41,9 +46,8 @@ class _ProcessViewState extends State<ProcessView> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.of(context).pushReplacement(MaterialPageRoute(
-                builder: (context) => LoginPage(),
-              )); // Navigate back when back button is pressed
+              Navigator.of(context).popUntil((route) => route.isFirst);
+              // Navigate back when back button is pressed
             },
           ),
           actions: [
@@ -63,48 +67,56 @@ class _ProcessViewState extends State<ProcessView> {
             child: Column(
           children: [
             ElevatedButton(
-              onPressed: () {
-                print(widget.meal);
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => CountPackedOrders(
-                            meal: widget.meal,
-                            locationNames: deliveryPartnerLocationName)));
-              },
+              onPressed: widget.partnerType == 'Delivery Partner'
+                  ? () {
+                      print(widget.meal);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CountPackedOrders(
+                                  meal: widget.meal,
+                                  locationNames: deliveryPartnerLocationName)));
+                    }
+                  : null,
               child: const Text('Packaging'),
             ),
             ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => CountDeliveredOrders(
-                            meal: widget.meal,
-                            locationNames: deliveryPartnerLocationName)));
-              },
+              onPressed: widget.partnerType == 'Delivery Partner'
+                  ? () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CountDeliveredOrders(
+                                  meal: widget.meal,
+                                  locationNames: deliveryPartnerLocationName)));
+                    }
+                  : null,
               child: const Text('Delivery'),
             ),
             ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => RepresentativeOrders(
-                            meal: widget.meal,
-                            locationNames: deliveryPartnerLocationName)));
-              },
+              onPressed: widget.partnerType == 'Representative'
+                  ? () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => RepresentativeOrders(
+                                  meal: widget.meal,
+                                  locationNames: deliveryPartnerLocationName)));
+                    }
+                  : null,
               child: const Text('Representative'),
             ),
             ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => CountPickedOrders(
-                            meal: widget.meal,
-                            locationNames: deliveryPartnerLocationName)));
-              },
+              onPressed: widget.partnerType == 'Delivery Partner'
+                  ? () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CountPickedOrders(
+                                  meal: widget.meal,
+                                  locationNames: deliveryPartnerLocationName)));
+                    }
+                  : null,
               child: const Text('Picking'),
             ),
           ],
