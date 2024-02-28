@@ -160,8 +160,11 @@ class _PickedQRViewState extends State<PickedQRView> {
                       await controller?.pauseCamera();
                       result = null;
                       for (var orderItem in scannedOrderDetails) {
-                        if (orderItem['orderStatus'] == 'Delivered') {
-                          print("orderItem $orderItem"); 
+                        if (orderItem['orderStatus'] == 'Delivered' &&
+                            orderItem["packaging"] == "Disposable") {
+                          print("pass");
+                        } else if (orderItem['orderStatus'] == 'Delivered' && orderItem["packaging"] == "Thermosteel" ) {
+                          print("orderItem $orderItem");
                           if (orderItem['quantity'] > 1) {
                             // Show the quantity input dialog
                             await _showQuantityDialog(context, orderItem);
