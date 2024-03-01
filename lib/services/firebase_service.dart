@@ -58,6 +58,7 @@ class FirebaseService {
           'pid': data['pid'],
           'deliveryDate': data['deliveryDate'],
           'locationType': data['locationType'],
+          'tiffinStatus':data['tiffinStatus'],
         };
       }).toList();
       print(ordersList);
@@ -110,6 +111,7 @@ class FirebaseService {
           'pid': data['pid'],
           'deliveryDate': data['deliveryDate'],
           'locationType': data['locationType'],
+          'tiffinStatus':data['tiffinStatus']
         };
       }).toList();
       print(ordersList);

@@ -91,7 +91,7 @@ class _CountPickedOrdersState extends State<CountPickedOrders> {
     for (String location in widget.locationNames ?? []) {
       // Fetch the total picked orders for the current location
       final Map<String, dynamic> pickedOrders = await firebaseService
-          .fetchOrderByOrderStatus('Picked', location, widget.meal);
+          .fetchOrderforPickingStatus('Picked', location, widget.meal);
       final int totalPickedOrders = pickedOrders['totalOrders'];
       final List<Map<String, dynamic>> pickedOrdersData = pickedOrders[
           'ordersList']; // Use a different variable name to avoid conflict
@@ -104,7 +104,7 @@ class _CountPickedOrdersState extends State<CountPickedOrders> {
 
       // Fetch the total delivered orders for the current location
       final Map<String, dynamic> deliveredOrders = await firebaseService
-          .fetchOrderByOrderStatus('Delivered', location, widget.meal);
+          .fetchOrderforPickingStatus('Delivered', location, widget.meal);
       final int totalDeliveredOrders = deliveredOrders['totalOrders'];
       final List<Map<String, dynamic>> deliveredOrdersData = deliveredOrders[
           'ordersList']; // Use a different variable name to avoid conflict
