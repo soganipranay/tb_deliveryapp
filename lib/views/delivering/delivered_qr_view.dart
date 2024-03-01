@@ -104,9 +104,7 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(
-              builder: (context) => LoginPage(),
-            )); // Navigate back when back button is pressed
+            Navigator.of(context).pop(); // Navigate back when back button is pressed
           },
         ),
         actions: [

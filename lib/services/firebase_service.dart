@@ -463,10 +463,10 @@ class FirebaseService {
         'initial_page_name': 'HomePage',
         'notification_sound': 'default',
         'notification_text':
-            'We are sad to see you go :(. We are improving every day, hope to serve you again!',
-        'notification_title': 'Subscription Cancellation',
+            'Your Tummy Box Meal has been delivered!',
+        'notification_title': 'Order Delivered!',
         'notification_image_url':
-            'https://firebasestorage.googleapis.com/v0/b/tummybox-f2238.appspot.com/o/FCMImages%2F6550850.png?alt=media&token=d2e2763f-219c-4161-84fd-8b9c69fa7f2f',
+            'https://firebasestorage.googleapis.com/v0/b/tummybox-f2238.appspot.com/tummybox_van.png',
         'num_sent': '',
         'parameter_data': '{}',
         'sender': "/Users/$senderRef",
