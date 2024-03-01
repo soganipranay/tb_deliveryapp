@@ -170,8 +170,11 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                       result = null;
                       for (var orderItem in scannedOrderDetails) {
                         print("orderItem: $orderItem");
-                        if (orderItem['orderStatus'] == 'Packed' && orderItem['locationType'] != 'School') {
+                        if (orderItem['orderStatus'] == 'Packed' &&
+                            orderItem['locationType'] != 'School') {
                           await firebaseService.updateOrderStatus(
+                              orderItem['orderRef'], 'Delivered');
+                          await firebaseService.updateTiffinStatus(
                               orderItem['orderRef'], 'Delivered');
                           // Update the order status in the local list
                           orderItem['orderStatus'] = 'Delivered';
@@ -199,9 +202,12 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                             print("Error marking order as delivered: $e");
                           }
                         } else if (orderItem['orderStatus'] == 'Packed' &&
-                            orderItem['locationType'] == 'School'){
-                            await firebaseService.updateOrderStatus(
+                            orderItem['locationType'] == 'School') {
+                          await firebaseService.updateOrderStatus(
                               orderItem['orderRef'], 'Handed');
+                          await firebaseService.updateTiffinStatus(
+                              orderItem['orderRef'], 'Delivered');
+
                           // Update the order status in the local list
                           orderItem['orderStatus'] = 'Handed';
                           if (orderItem['packaging'] == "Disposable") {
@@ -225,9 +231,8 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                             print("message sent");
                           } catch (e) {
                             print("Error marking order as delivered: $e");
-                          }   
-                        } 
-                        else {
+                          }
+                        } else {
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {

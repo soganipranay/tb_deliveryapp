@@ -138,6 +138,16 @@ class FirebaseService {
       print('Error updating order status: $e');
     }
   }
+  Future<void> updateTiffinStatus(String orderId, String newStatus) async {
+    try {
+      final orderDocRef = ordersCollection.doc(orderId);
+
+      await orderDocRef.update({'tiffinStatus': newStatus});
+      print('Tiffin status updated to: $newStatus');
+    } catch (e) {
+      print('Error updating Tiffin status: $e');
+    }
+  }
 
   Future<void> updateOrdersInFirestore(
       List<Map<String, dynamic>> ordersToUpdate) async {
