@@ -174,6 +174,8 @@ class _PickedQRViewState extends State<PickedQRView> {
                           }
                           await firebaseService.updateOrderStatus(
                               orderItem['orderRef'], 'Picked');
+                            await firebaseService.updateTiffinStatus(
+                              orderItem['orderRef'], 'Picked');
                           orderItem['orderStatus'] = 'Picked';
                           if (orderItem['packaging'] == "Disposable") {
                             print("not available");
