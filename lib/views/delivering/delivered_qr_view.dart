@@ -134,7 +134,7 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                     itemBuilder: (context, index) {
                       final orderItem = scannedOrderDetails[index];
                       bool isDelivered =
-                          orderItem['orderStatus'] == 'Delivered';
+                          orderItem['orderStatus'] == 'Delivered' || orderItem['orderStatus'] == 'Handed';
 
                       return ListTile(
                         title: Text("Order Name: ${orderItem['orderName']}"),
@@ -169,7 +169,7 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                       for (var orderItem in scannedOrderDetails) {
                         print("orderItem: $orderItem");
                         if (orderItem['orderStatus'] == 'Packed' &&
-                            orderItem['locationType'] != 'School') {
+                            ((orderItem['locationType'] == 'office')||(orderItem['locationType'] == 'Office'))) {
                           await firebaseService.updateOrderStatus(
                               orderItem['orderRef'], 'Delivered');
                           await firebaseService.updateTiffinStatus(
@@ -200,7 +200,7 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                             print("Error marking order as delivered: $e");
                           }
                         } else if (orderItem['orderStatus'] == 'Packed' &&
-                            orderItem['locationType'] == 'School') {
+                            ((orderItem['locationType'] == 'school')||(orderItem['locationType'] == 'School'))) {
                           await firebaseService.updateOrderStatus(
                               orderItem['orderRef'], 'Handed');
                           await firebaseService.updateTiffinStatus(
