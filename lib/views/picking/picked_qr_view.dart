@@ -125,9 +125,9 @@ class _PickedQRViewState extends State<PickedQRView> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: deliveredOrders.length,
+              itemCount: scannedOrderDetails.length,
               itemBuilder: (context, index) {
-                final orderItem = deliveredOrders[index];
+                final orderItem = scannedOrderDetails[index];
                 bool isPicked = orderItem['orderStatus'] == 'Picked';
 
                 return ListTile(
@@ -175,8 +175,10 @@ class _PickedQRViewState extends State<PickedQRView> {
                           await firebaseService.updateOrderStatus(
                               orderItem['orderRef'], 'Picked');
                             await firebaseService.updateTiffinStatus(
-                              orderItem['orderRef'], 'Picked');
+                              orderItem['orderRef'], 'Returned');
                           orderItem['orderStatus'] = 'Picked';
+                          orderItem['tiffinStatus'] = 'Returned';
+
                           if (orderItem['packaging'] == "Disposable") {
                             print("not available");
                           } else {
