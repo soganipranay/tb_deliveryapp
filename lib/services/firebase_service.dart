@@ -38,7 +38,7 @@ class FirebaseService {
           // .where('deliveryDate', isGreaterThanOrEqualTo: currentDateStart)
           .where('deliveryDate', isLessThan: currentDateStart)
           .where('Status', isEqualTo: orderStatus)
-          .where('location', isEqualTo: location)
+          .where('locationName', isEqualTo: location)
           .where('orderType', isEqualTo: orderType)
           .where('packaging', isEqualTo: "Thermosteel")
           .get();
