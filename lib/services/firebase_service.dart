@@ -40,6 +40,7 @@ class FirebaseService {
           .where('Status', isEqualTo: orderStatus)
           .where('location', isEqualTo: location)
           .where('orderType', isEqualTo: orderType)
+          .where('packaging', isEqualTo: "Thermosteel")
           .get();
       final totalOrders = querySnapshot.size;
 
@@ -58,7 +59,7 @@ class FirebaseService {
           'pid': data['pid'],
           'deliveryDate': data['deliveryDate'],
           'locationType': data['locationType'],
-          'tiffinStatus':data['tiffinStatus'],
+          'tiffinStatus': data['tiffinStatus'],
         };
       }).toList();
       print(ordersList);
@@ -111,7 +112,7 @@ class FirebaseService {
           'pid': data['pid'],
           'deliveryDate': data['deliveryDate'],
           'locationType': data['locationType'],
-          'tiffinStatus':data['tiffinStatus']
+          'tiffinStatus': data['tiffinStatus']
         };
       }).toList();
       print(ordersList);
@@ -138,6 +139,7 @@ class FirebaseService {
       print('Error updating order status: $e');
     }
   }
+
   Future<void> updateTiffinStatus(String orderId, String newStatus) async {
     try {
       final orderDocRef = ordersCollection.doc(orderId);
@@ -462,8 +464,7 @@ class FirebaseService {
       Map<String, dynamic> notificationDetails = {
         'initial_page_name': 'HomePage',
         'notification_sound': 'default',
-        'notification_text':
-            'Your Tummy Box Meal has been delivered!',
+        'notification_text': 'Your Tummy Box Meal has been delivered!',
         'notification_title': 'Order Delivered!',
         'notification_image_url':
             'https://firebasestorage.googleapis.com/v0/b/tummybox-f2238.appspot.com/tummybox_van.png',

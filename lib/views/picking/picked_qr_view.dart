@@ -163,7 +163,7 @@ class _PickedQRViewState extends State<PickedQRView> {
                         if (orderItem['orderStatus'] == 'Delivered' &&
                             orderItem["packaging"] == "Disposable") {
                           print("pass");
-                        } else if (orderItem['orderStatus'] == 'Delivered' && orderItem["packaging"] == "Thermosteel" ) {
+                        } else if (orderItem['orderStatus'] == 'Delivered' && orderItem["packaging"] == "Thermosteel") {
                           print("orderItem $orderItem");
                           if (orderItem['quantity'] > 1) {
                             // Show the quantity input dialog
