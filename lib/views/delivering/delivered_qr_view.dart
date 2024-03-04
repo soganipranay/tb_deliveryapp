@@ -31,46 +31,53 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
       setState(() {
         result = scanData;
       });
-
+      List<Map<String, dynamic>> matchingOrders = [];
       // Check if the scanned QR code exists in the packedOrdersList
       bool found = false;
-      Map<String, dynamic>? orderDetails;
+      // Map<String, dynamic>? orderDetails;
       print(widget.packedOrdersList);
       for (var orderItem in widget.packedOrdersList) {
         if (orderItem['pid'] == result!.code.toString()) {
-          found = true;
-          orderDetails = orderItem;
-          break;
+          matchingOrders.add(orderItem);
         }
       }
 
-      if (found) {
-        // Handle the case when the QR code is found in packedOrdersList
+      if (matchingOrders.isNotEmpty) {
+        // Handle the case when the QR code is found in pendingOrdersList
         print("QR Code found in packedOrdersList: ${result!.code.toString()}");
         setState(() {
           scannedOrderDetails.clear();
-          scannedOrderDetails.add(orderDetails!);
+          scannedOrderDetails.addAll(matchingOrders);
         });
 
+        // Handle the case when the QR code is found in packedOrdersList
+        // print("QR Code found in packedOrdersList: ${result!.code.toString()}");
+        // setState(() {
+        //   scannedOrderDetails.clear();
+        //   scannedOrderDetails.add(orderDetails!);
+        // });
+
         // Check if all orders are delivered and the packed order list is empty
-        bool allDelivered = true;
-        for (var orderItem in scannedOrderDetails) {
-          if (orderItem['orderStatus'] != 'Delivered') {
-            allDelivered = false;
-            break;
-          }
-        }
+        // bool allDelivered = true;
+        // for (var orderItem in scannedOrderDetails) {
+        //   if (orderItem['orderStatus'] != 'Delivered') {
+        //     allDelivered = false;
+        //     break;
+        //   }
+        // }
+        bool allDelivered = scannedOrderDetails
+            .every((orderItem) => orderItem['orderStatus'] == 'Delivered');
+
         if (allDelivered && widget.packedOrdersList.isEmpty) {
           // Prepare a list of orders to update in Firestore
-          List<Map<String, dynamic>> ordersToUpdate = [];
-          for (var orderItem in scannedOrderDetails) {
-            if (orderItem['orderStatus'] == 'Delivered') {
-              ordersToUpdate.add({
-                'orderRef': orderItem['orderRef'],
-                'orderStatus': 'Delivered',
-              });
-            }
-          }
+          List<Map<String, dynamic>> ordersToUpdate = scannedOrderDetails
+              .where((orderItem) => orderItem['orderStatus'] == 'Delivered')
+              .map((orderItem) => {
+                    'orderRef': orderItem['orderRef'],
+                    'orderStatus': 'Delivered',
+                  })
+              .toList();
+
           // Update the Firestore collection with delivered orders
           await firebaseService.updateOrdersInFirestore(ordersToUpdate);
           print("Orders updated in Firestore");
@@ -104,7 +111,8 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.of(context).pop(); // Navigate back when back button is pressed
+            Navigator.of(context)
+                .pop(); // Navigate back when back button is pressed
           },
         ),
         actions: [
@@ -134,7 +142,8 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                     itemBuilder: (context, index) {
                       final orderItem = scannedOrderDetails[index];
                       bool isDelivered =
-                          orderItem['orderStatus'] == 'Delivered' || orderItem['orderStatus'] == 'Handed';
+                          orderItem['orderStatus'] == 'Delivered' ||
+                              orderItem['orderStatus'] == 'Handed';
 
                       return ListTile(
                         title: Text("Order Name: ${orderItem['orderName']}"),
@@ -169,13 +178,16 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                       for (var orderItem in scannedOrderDetails) {
                         print("orderItem: $orderItem");
                         if (orderItem['orderStatus'] == 'Packed' &&
-                            ((orderItem['locationType'] == 'office')||(orderItem['locationType'] == 'Office'))) {
+                            ((orderItem['locationType'] == 'office') ||
+                                (orderItem['locationType'] == 'Office'))) {
                           await firebaseService.updateOrderStatus(
                               orderItem['orderRef'], 'Delivered');
                           await firebaseService.updateTiffinStatus(
                               orderItem['orderRef'], 'Delivered');
                           // Update the order status in the local list
                           orderItem['orderStatus'] = 'Delivered';
+                          orderItem['tiffinStatus'] = 'Delivered';
+
                           if (orderItem['packaging'] == "Disposable") {
                             print("not available");
                           } else {
@@ -200,7 +212,8 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
                             print("Error marking order as delivered: $e");
                           }
                         } else if (orderItem['orderStatus'] == 'Packed' &&
-                            ((orderItem['locationType'] == 'school')||(orderItem['locationType'] == 'School'))) {
+                            ((orderItem['locationType'] == 'school') ||
+                                (orderItem['locationType'] == 'School'))) {
                           await firebaseService.updateOrderStatus(
                               orderItem['orderRef'], 'Handed');
                           await firebaseService.updateTiffinStatus(
@@ -208,6 +221,7 @@ class _DeliveredQRViewState extends State<DeliveredQRView> {
 
                           // Update the order status in the local list
                           orderItem['orderStatus'] = 'Handed';
+                          orderItem['tiffinStatus'] = 'Delivered';
                           if (orderItem['packaging'] == "Disposable") {
                             print("not available");
                           } else {
