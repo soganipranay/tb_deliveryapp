@@ -10,14 +10,33 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
+  String? _emailError;
+  String? _passwordError;
   void _signIn() async {
     setState(() {
       _isLoading =
           true; // Set loading state to true when login button is clicked
+      _emailError = null; // Clear previous email error
+      _passwordError = null; // Clear previous password error
     });
 
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
+    if (email.isEmpty) {
+      setState(() {
+        _emailError =
+            'Please enter your email'; // Set email error if it's empty
+      });
+      return;
+    }
+
+    if (password.isEmpty) {
+      setState(() {
+        _passwordError =
+            'Please enter your password'; // Set password error if it's empty
+      });
+      return;
+    }
 
     try {
       await _authManager.signInWithEmailAndPassword(email, password, context);
@@ -74,6 +93,7 @@ class _LoginPageState extends State<LoginPage> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
+                      errorText: _emailError, // Display email error if not null
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -88,6 +108,8 @@ class _LoginPageState extends State<LoginPage> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
+                      errorText:
+                          _passwordError, // Display password error if not null
                     ),
                   ),
                   const SizedBox(height: 30),

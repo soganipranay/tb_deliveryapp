@@ -52,6 +52,7 @@ dependencies:
   firebase_messaging: ^14.7.3
   flutter_launcher_icons: "^0.9.2"
   url_launcher: ^6.2.4
+  mailer: ^6.1.0
   # flutter_background_geolocation: ^4.13.3
 
 dev_dependencies:

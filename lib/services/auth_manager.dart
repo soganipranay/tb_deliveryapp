@@ -47,9 +47,7 @@ class AuthManager {
               partnerType: representativeId?[0][0]),
         ));
       } else {
-        // No partner found for that email
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('No partner found for that email.')));
+           print('No partner found for that email.');
       }
     } on FirebaseAuthException catch (e) {
       // Handle Firebase Authentication errors (e.g., user-not-found, wrong-password)

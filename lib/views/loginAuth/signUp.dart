@@ -271,12 +271,13 @@ class _SignUpPageState extends State<SignUpPage> {
                         print("phone $value");
                         if (value == null || value.isEmpty) {
                           return 'Please enter your number';
+                        } else if (!RegExp(r'^\d{1,10}$').hasMatch(value)) {
+                          return 'Please enter a valid phone number (up to 10 digits)';
                         }
-                        // You can add more email validation here if needed
                         return null;
                       },
                       onSaved: (value) {
-                        _phoneNumber = (value);
+                        _phoneNumber = value;
                       },
                     ),
                     TextFormField(
@@ -379,10 +380,30 @@ class _SignUpPageState extends State<SignUpPage> {
                                     await _addUserDataToFirestore(
                                         userCredential.user!);
 
-                                    Navigator.of(context).pushReplacement(
-                                      MaterialPageRoute(
-                                        builder: (context) => LoginPage(),
-                                      ),
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text('Thank You!'),
+                                          content:
+                                              Text('Thank you for signing up.'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                                Navigator.of(context)
+                                                    .pushReplacement(
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        LoginPage(),
+                                                  ),
+                                                );
+                                              },
+                                              child: Text('OK'),
+                                            ),
+                                          ],
+                                        );
+                                      },
                                     );
                                   }
                                 }
