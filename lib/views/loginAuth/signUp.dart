@@ -24,6 +24,7 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _showPassword = false;
   bool _isLoading = false;
   final List<String> _userTypes = ['Delivery Partner', 'Representative'];
+  FirebaseService firebaseService = FirebaseService();
 
   Future<void> _addUserDataToFirestore(User user) async {
     try {
@@ -379,32 +380,49 @@ class _SignUpPageState extends State<SignUpPage> {
                                   if (userCredential.user != null) {
                                     await _addUserDataToFirestore(
                                         userCredential.user!);
-
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          title: Text('Thank You!'),
-                                          content:
-                                              Text('Thank you for signing up.'),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.of(context).pop();
-                                                Navigator.of(context)
-                                                    .pushReplacement(
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        LoginPage(),
-                                                  ),
-                                                );
-                                              },
-                                              child: Text('OK'),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
+                                    // Send email and wait for completion
+                                    await firebaseService
+                                        .sendEmail(_email!)
+                                        .then((_) {
+                                      // Email sent successfully, proceed with navigation
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text('Thank You!'),
+                                            content: Text(
+                                                'Thank you for signing up.'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () async {
+                                                  await firebaseService
+                                                      .sendEmail(_email!);
+                                                  Navigator.of(context).pop();
+                                                  Navigator.of(context)
+                                                      .pushReplacement(
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          LoginPage(),
+                                                    ),
+                                                  );
+                                                },
+                                                child: Text('OK'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    }).catchError((error) {
+                                    // Handle error if email sending fails
+                                    print("Error sending email: $error");
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text(
+                                              'Error sending email. Please try again.'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    });
                                   }
                                 }
                               } catch (e) {

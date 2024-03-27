@@ -392,7 +392,7 @@ class FirebaseService {
             String name = officeData["name"];
             String mapLink = officeData["mapsLink"];
             locationMap[name] = mapLink;
-            
+
             globalLocationMap = locationMap;
             print("locationMap: $globalLocationMap");
             // }
@@ -502,5 +502,25 @@ class FirebaseService {
       print('Error uploading notification document: $e');
     }
   }
-}
 
+  Future<void> sendEmail(String recipientEmail) async {
+    String username = 'tummybox8@gmail.com'; // Your email
+    String password = 'tummy@tummybox'; // Your email password
+
+    final smtpServer = gmail(username, password);
+
+    // Create the email message
+    final message = Message()
+      ..from = Address(username, 'Your Name')
+      ..recipients.add(recipientEmail)
+      ..subject = 'Thank You for Signing Up!'
+      ..text = 'Thank you for signing up. We appreciate your interest.';
+
+    try {
+      final sendReport = await send(message, smtpServer);
+      print('Message sent: ' + sendReport.toString());
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+}
