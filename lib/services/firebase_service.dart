@@ -5,6 +5,7 @@ import 'package:tb_deliveryapp/all.dart';
 
 // ignore_for_file: use_build_context_synchronously
 Timer? locationUpdateTimer;
+Map<String, String> globalLocationMap = {};
 
 class FirebaseService {
   final _firebaseMessaging = FirebaseMessaging.instance;
@@ -374,6 +375,7 @@ class FirebaseService {
   Future<List<String>?> fetchLocationNamesByLocationIds(
       List<dynamic>? locations) async {
     List<String> locationNames = [];
+    Map<String, String> locationMap = {};
 
     try {
       if (locations != null) {
@@ -384,7 +386,16 @@ class FirebaseService {
           print("locationRef $locationRef");
           if (officeSnapshot.exists) {
             final dynamic officeData = officeSnapshot.data(); // Cast to dynamic
+            print("officeData: $officeData");
             locationNames.add("${officeData["name"]}");
+            // if( officeData["mapsLink"] == true){
+            String name = officeData["name"];
+            String mapLink = officeData["mapsLink"];
+            locationMap[name] = mapLink;
+            
+            globalLocationMap = locationMap;
+            print("locationMap: $globalLocationMap");
+            // }
           } else {
             // Check if the location is in the schoolLocation collection
             DocumentReference schoolDoc = schoolLocation.doc(locationRef);
@@ -392,6 +403,13 @@ class FirebaseService {
             if (schoolSnapshot.exists) {
               final dynamic schoolData =
                   schoolSnapshot.data(); // Cast to dynamic
+              print("schoolData: $schoolData");
+              String name = schoolData["name"];
+              String mapLink = schoolData["mapsLink"];
+              locationMap[name] = mapLink;
+
+              globalLocationMap = locationMap;
+              print("locationMap: $globalLocationMap");
               locationNames.add("${schoolData["name"]}");
             } else {
               // Print a message when neither officeDoc nor schoolDoc exists
@@ -485,3 +503,4 @@ class FirebaseService {
     }
   }
 }
+

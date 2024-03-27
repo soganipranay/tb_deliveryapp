@@ -23,7 +23,8 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
   List<Map<String, dynamic>> pendingOrdersList = [];
 
   List<String>? locationNames; // Declare the variable
-  bool isLoading = true; // A
+  bool isLoading = true;
+  
   @override
   void initState() {
     super.initState();
@@ -81,14 +82,18 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
                           icon: Icon(Icons.more_vert),
                           itemBuilder: (BuildContext context) => [
                             PopupMenuItem<String>(
-                              value: 'Location',
+                              value: locationName,
                               child: GestureDetector(
                                 onTap: () {
                                   // Handle link opening here
-
-                                  // Use 'launch' directly with the URL string
-                                  _launchUrl();
-                                  print('Open Location Link Clicked');
+                                  String? mapLink = globalLocationMap[locationName];
+                                  if (mapLink != null) {
+                                    _launchUrl(mapLink); // Launch the URL
+                                    print('Open Location Link Clicked');
+                                  } else {
+                                    print(
+                                        'Map link not found for $locationName');
+                                  }
                                 },
                                 child: Text('Open Location'),
                               ),
@@ -108,9 +113,10 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
     );
   }
 
-  final Uri _url = Uri.parse(
-      'https://www.google.com/search?q=wtp+location+jaipur&oq=wtp+locaation+&gs_lcrp=EgZjaHJvbWUqCQgBEAAYDRiABDIGCAAQRRg5MgkIARAAGA0YgAQyCAgCEAAYFhgeMggIAxAAGBYYHjIICAQQABgWGB4yDQgFEAAYhgMYgAQYigUyDQgGEAAYhgMYgAQYigXSAQg2OTYyajBqN6gCALACAA&sourceid=chrome&ie=UTF-8&lqi=ChN3dHAgbG9jYXRpb24gamFpcHVySPSvxMztqoCACFoZEAAYACITd3RwIGxvY2F0aW9uIGphaXB1cpIBD3Nob3BwaW5nX2NlbnRlcpoBJENoZERTVWhOTUc5blMwVkpRMEZuU1VSemNVbDFSRGxuUlJBQqoBRBABKgciA3d0cCgAMh4QASIahS40xo7-cDhN57Qu7Gcv_Soh6_gw4Gb4uAEyFxACIhN3dHAgbG9jYXRpb24gamFpcHVy#rlimm=4847010798830747055');
-  Future<void> _launchUrl() async {
+  // final Uri _url = Uri.parse(
+  //     'https://www.google.com/search?q=wtp+location+jaipur&oq=wtp+locaation+&gs_lcrp=EgZjaHJvbWUqCQgBEAAYDRiABDIGCAAQRRg5MgkIARAAGA0YgAQyCAgCEAAYFhgeMggIAxAAGBYYHjIICAQQABgWGB4yDQgFEAAYhgMYgAQYigUyDQgGEAAYhgMYgAQYigXSAQg2OTYyajBqN6gCALACAA&sourceid=chrome&ie=UTF-8&lqi=ChN3dHAgbG9jYXRpb24gamFpcHVySPSvxMztqoCACFoZEAAYACITd3RwIGxvY2F0aW9uIGphaXB1cpIBD3Nob3BwaW5nX2NlbnRlcpoBJENoZERTVWhOTUc5blMwVkpRMEZuU1VSemNVbDFSRGxuUlJBQqoBRBABKgciA3d0cCgAMh4QASIahS40xo7-cDhN57Qu7Gcv_Soh6_gw4Gb4uAEyFxACIhN3dHAgbG9jYXRpb24gamFpcHVy#rlimm=4847010798830747055');
+  Future<void> _launchUrl(String mapLink) async {
+    Uri _url = Uri.parse(mapLink);
     if (await canLaunchUrl(_url)) {
       await launchUrl(_url);
       print("url launched");

@@ -34,6 +34,15 @@ class _CountDeliveredOrdersState extends State<CountDeliveredOrders> {
     countDeliveredOrders(); // Call the function to fetch the data
     print("deliveredOrdersList $deliveredOrdersList");
   }
+  Future<void> _launchUrl(String mapLink)  async {
+    Uri _url = Uri.parse(mapLink);
+    if (await canLaunchUrl(_url)) {
+      await launchUrl(_url);
+      print("url launched");
+    } else {
+      throw Exception('Could not launch $_url');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,14 +81,44 @@ class _CountDeliveredOrdersState extends State<CountDeliveredOrders> {
                         ),
                         tileColor: Colors.blue.withOpacity(0.1),
                         onTap: () {
-                          Navigator.of(context)
-                              .pushReplacement(MaterialPageRoute(
+                          Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
                                   builder: (context) => DeliveredQRView(
-                                        packedOrdersList: packedOrdersList,
-                                        locationName: locationName
-                                      ))); // Pass locationNames
+                                      packedOrdersList: packedOrdersList,
+                                      locationName:
+                                          locationName))); // Pass locationNames
                           // Handle tap event if needed
                         },
+                          trailing:
+                          PopupMenuButton<String>(
+                            icon: Icon(Icons.more_vert),
+                            itemBuilder: (BuildContext context) => [
+                              PopupMenuItem<String>(
+                                value: locationName,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    // Handle link opening here
+                                    String? mapLink =
+                                        globalLocationMap[locationName];
+                                    if (mapLink != null) {
+                                      _launchUrl(
+                                          mapLink); // Launch the URL
+                                      print('Open Location Link Clicked');
+                                    } else {
+                                      print(
+                                          'Map link not found for $locationName');
+                                    }
+                                  },
+                                  child: Text('Open Location'),
+                                ),
+                              ),
+                              // Add more options as needed
+                            ],
+                            onSelected: (String value) {
+                              // Handle the selected option
+                              print('Selected: $value');
+                            },
+                          ),
                       );
                     }).toList() ??
                     [],
@@ -88,6 +127,7 @@ class _CountDeliveredOrdersState extends State<CountDeliveredOrders> {
     );
   }
 
+  
   Future<void> countDeliveredOrders() async {
     for (String location in widget.locationNames ?? []) {
       // Fetch the total delivered orders for the current location

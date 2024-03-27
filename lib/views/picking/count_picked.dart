@@ -60,30 +60,70 @@ class _CountPickedOrdersState extends State<CountPickedOrders> {
                           locationPickedOrders[locationName] ?? 0;
 
                       return ListTile(
-                        title: Text(locationName),
-                        subtitle: Text(
-                          "Delivered: $deliveredOrders, Picked: $pickedOrders",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
+                          title: Text(locationName),
+                          subtitle: Text(
+                            "Delivered: $deliveredOrders, Picked: $pickedOrders",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
                           ),
-                        ),
-                        tileColor: Colors.blue.withOpacity(0.1),
-                        onTap: () {
-                          Navigator.of(context)
-                              .pushReplacement(MaterialPageRoute(
-                                  builder: (context) => PickedQRView(
-                                        deliveredOrdersList:
-                                            deliveredOrdersList,
-                                      ))); // Pass locationNames
-                          // Handle tap event if needed
-                        },
+                          tileColor: Colors.blue.withOpacity(0.1),
+                          onTap: () {
+                            Navigator.of(context)
+                                .pushReplacement(MaterialPageRoute(
+                                    builder: (context) => PickedQRView(
+                                          deliveredOrdersList:
+                                              deliveredOrdersList,
+                                        ))); // Pass locationNames
+                            // Handle tap event if needed
+                            },
+                            trailing:
+                            PopupMenuButton<String>(
+                              icon: Icon(Icons.more_vert),
+                              itemBuilder: (BuildContext context) => [
+                                PopupMenuItem<String>(
+                                  value: locationName,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      // Handle link opening here
+                                      String? mapLink =
+                                          globalLocationMap[locationName];
+                                      if (mapLink != null) {
+                                        _launchUrl(
+                                            mapLink); // Launch the URL
+                                        print('Open Location Link Clicked');
+                                      } else {
+                                        print(
+                                            'Map link not found for $locationName');
+                                      }
+                                    },
+                                    child: Text('Open Location'),
+                                  ),
+                                ),
+                                // Add more options as needed
+                              ],
+                              onSelected: (String value) {
+                                // Handle the selected option
+                                print('Selected: $value');
+                             },
+                          ),
                       );
                     }).toList() ??
                     [],
               ),
             ),
     );
+  }
+
+  Future<void> _launchUrl(String mapLink) async {
+    Uri _url = Uri.parse(mapLink);
+    if (await canLaunchUrl(_url)) {
+      await launchUrl(_url);
+      print("url launched");
+    } else {
+      throw Exception('Could not launch $_url');
+    }
   }
 
   Future<void> countPickedOrders() async {
