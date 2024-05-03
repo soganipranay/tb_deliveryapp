@@ -48,13 +48,16 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
           ),
         ),
       ),
-      body: isLoading // Check if data is still loading
+      body: isLoading
           ? Center(
               child: CircularProgressIndicator(),
             )
-          : SingleChildScrollView(
-              child: Column(
-                children: locationNames?.map((locationName) {
+          : locationNames != null ||
+                  locationNames!
+                      .isNotEmpty // Check if locationNames is not empty
+              ? SingleChildScrollView(
+                  child: Column(
+                    children: locationNames!.map((locationName) {
                       final int pendingOrders =
                           locationPendingOrders[locationName] ?? 0;
                       final int packedOrders =
@@ -71,11 +74,13 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
                         ),
                         tileColor: Colors.blue.withOpacity(0.1),
                         onTap: () {
-                          Navigator.of(context)
-                              .pushReplacement(MaterialPageRoute(
-                                  builder: (context) => PackedQRView(
-                                        pendingOrdersList: pendingOrdersList,
-                                      ))); // Pass locationNames
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => PackedQRView(
+                                pendingOrdersList: pendingOrdersList,
+                              ),
+                            ),
+                          ); // Pass locationNames
                           // Handle tap event if needed
                         },
                         trailing: PopupMenuButton<String>(
@@ -86,7 +91,8 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
                               child: GestureDetector(
                                 onTap: () {
                                   // Handle link opening here
-                                  String? mapLink = globalLocationMap[locationName];
+                                  String? mapLink =
+                                      globalLocationMap[locationName];
                                   if (mapLink != null) {
                                     _launchUrl(mapLink); // Launch the URL
                                     print('Open Location Link Clicked');
@@ -106,10 +112,19 @@ class _CountPackedOrdersState extends State<CountPackedOrders> {
                           },
                         ),
                       );
-                    }).toList() ??
-                    [],
-              ),
-            ),
+                    }).toList(),
+                  ),
+                )
+              : Center(
+                  // Display a message if locationNames is empty
+                  child: Text(
+                    'No locations assigned yet',
+                    style: TextStyle(
+                      fontSize: 18,
+                      
+                    ),
+                  ),
+                ),
     );
   }
 

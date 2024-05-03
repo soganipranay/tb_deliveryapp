@@ -51,7 +51,10 @@ class _CountPickedOrdersState extends State<CountPickedOrders> {
           ? Center(
               child: CircularProgressIndicator(),
             )
-          : SingleChildScrollView(
+          : locationNames != null ||
+                  locationNames!
+                      .isNotEmpty // Check if locationNames is not empty
+              ? SingleChildScrollView(
               child: Column(
                 children: locationNames?.map((locationName) {
                       final int deliveredOrders =
@@ -112,7 +115,16 @@ class _CountPickedOrdersState extends State<CountPickedOrders> {
                     }).toList() ??
                     [],
               ),
-            ),
+            ): Center(
+                  // Display a message if locationNames is empty
+                  child: Text(
+                    'No locations assigned yet',
+                    style: TextStyle(
+                      fontSize: 18,
+                      
+                    ),
+                  ),
+                ),
     );
   }
 

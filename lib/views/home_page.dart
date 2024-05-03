@@ -43,20 +43,22 @@ class _HomeViewState extends State<HomeView> {
           await firebaseService.getLocationsForPartnerId(retainedPartnerId);
       Map<String, dynamic> details =
           await firebaseService.getPartnerDetails(retainedPartnerId);
-
+      setState(() {
       if (locations != null) {
-        setState(() {
           deliveryPartnerLocations = locations;
           partnerDetails = details; // Store the details in the state
-          // name = partnerDetails['display_name'];
-          // email = partnerDetails['email'];
-          // phone = partnerDetails['phone_number'];
-          // photoUrl = partnerDetails['photo_url'];
           // print("photoUrl $photoUrl");
           print("Partner Details: $partnerDetails");
           print("Home deliveryPartnerLocations $deliveryPartnerLocations");
-        });
+      } else {
+          partnerDetails = details; // Store the details in the state
+          // name = partnerDetails['display_name'];
+
+          print("Partner Details: $partnerDetails");
+          // print("Home deliveryPartnerLocations $deliveryPartnerLocations");
+        print("No location available");
       }
+      });
       print(partnerDetails);
       return partnerDetails;
     } catch (e) {
@@ -96,7 +98,9 @@ class _HomeViewState extends State<HomeView> {
         future: dataFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator()); // Display a loading indicator while fetching data.
+            return Center(
+                child:
+                    CircularProgressIndicator()); // Display a loading indicator while fetching data.
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           } else if (!snapshot.hasData) {
@@ -201,7 +205,6 @@ class _HomeViewState extends State<HomeView> {
                                   meal: "Lunch",
                                   locations: deliveryPartnerLocations,
                                   partnerType: retainedPartnertype,
-
                                 ),
                               ),
                             );
@@ -217,7 +220,6 @@ class _HomeViewState extends State<HomeView> {
                                   meal: "Dinner",
                                   locations: deliveryPartnerLocations,
                                   partnerType: retainedPartnertype,
-
                                 ),
                               ),
                             );
@@ -319,7 +321,6 @@ class _HomeViewState extends State<HomeView> {
               return Center(
                 child: Text('Unknown User Type'),
               );
-              
             }
           }
         },
